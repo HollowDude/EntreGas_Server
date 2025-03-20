@@ -1,0 +1,2 @@
+from .trabajadorSerializer import TrabajadorSerializer
+from .clienteSerializer import ClienteSerializer

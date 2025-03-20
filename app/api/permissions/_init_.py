@@ -1,0 +1,1 @@
+from .trabajadorPermissions import IsJefeOrReadOnly
