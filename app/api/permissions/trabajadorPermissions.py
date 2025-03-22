@@ -4,10 +4,16 @@ class IsJefeOrReadOnly(permissions.BasePermission):
 
 
     def has_permission(self, request, view):
-        if request.user and request.user.is_superuser:
+        # Acceso de lectura para cualquier usuario autenticado
+        #Esto va  avariar claro
+        if request.method in permissions.SAFE_METHODS:
+            return request.user.is_authenticated
+        
+        # Escritura solo para superusuarios o jefes de servicio
+        if request.user.is_superuser:
             return True
         
-        if request.user and hasattr(request.user, 'trabajador'):
-            return request.user.trabajador.puesto == "jefe de servicio" and request.method in permissions.SAFE_METHODS
+        if hasattr(request.user, 'trabajador'):
+            return request.user.trabajador.puesto == "jefe de servicio"
         
         return False
