@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from app.api.permissions.trabajadorPermissions import IsJefeOrReadOnly
 
 class Comprobante_EntregaViewSet(viewsets.ModelViewSet):
-    queryset = Comprobante_Entrega.objects.all()
+    queryset = Comprobante_Entrega.objects.select_related('cliente__user')
     serializer_class = Comprobante_EntregaSerializer
     permission_classes = [IsAuthenticated, IsJefeOrReadOnly]
 

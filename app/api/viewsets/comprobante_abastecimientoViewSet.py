@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from app.api.permissions.trabajadorPermissions import IsJefeOrReadOnly
 
 class Comprobante_AbastecimientoViewSet(viewsets.ModelViewSet):
-    queryset = Comprobante_Abastecimiento.objects.select_related('trabajador_recivio__user').all()
+    queryset = Comprobante_Abastecimiento.objects.select_related('trabajador_recivio__user')
     serializer_class = Comprobante_AbastecimientoSerializer
     permission_classes = [IsAuthenticated, IsJefeOrReadOnly]
 
