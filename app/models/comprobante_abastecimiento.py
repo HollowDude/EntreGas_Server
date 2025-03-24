@@ -1,8 +1,7 @@
 from django.db import models
 from .trabajador import Trabajador
-from .cilindro import Cilindro
 
-class Comprobante_Entrega(models.Model):
+class Comprobante_Abastecimiento(models.Model):
     fecha = models.DateField()
     cant_cilindros = models.IntegerField()
     proveedor = models.CharField(max_length = 50)

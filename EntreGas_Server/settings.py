@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'EntreGas_Server.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'entregas1',
+        'NAME': 'entregas',
         'USER': 'postgres',
         'PASSWORD': '2502666',
         'HOST': 'localhost',
