@@ -1,3 +1,6 @@
 from .trabajadorSerializer import TrabajadorSerializer
 from .clienteSerializer import ClienteSerializer
 from .cilindroSerializer import CilindroSerializer
+from .comprobante_entregaSerializer import Comprobante_EntregaSerializer
+from .comprobante_abastecimientoSerializer import Comprobante_AbastecimientoSerializer
+from .reporte_devolucionSerializer import Reporte_DevolucionSerializer

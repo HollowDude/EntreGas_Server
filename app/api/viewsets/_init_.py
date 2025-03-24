@@ -1,3 +1,6 @@
 from .trabajadorViewSet import TrabajadorViewSet
 from .clienteViewSet import ClienteViewSet
 from .authentication import AuthViewSet
+from .comprobante_entregaViewSet import Comprobante_EntregaViewSet
+from .comprobante_abastecimientoViewSet import Comprobante_AbastecimientoViewSet
+from .reporte_devolucionViewSet import Reporte_DevolucionViewSet
