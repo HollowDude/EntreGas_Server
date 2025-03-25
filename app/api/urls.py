@@ -7,6 +7,7 @@ from app.api.viewsets.cilindroViewSet import CilindroViewSet
 from app.api.viewsets.comprobante_abastecimientoViewSet import Comprobante_AbastecimientoViewSet
 from app.api.viewsets.comprobante_entregaViewSet import Comprobante_EntregaViewSet
 from app.api.viewsets.reporte_devolucionViewSet import Reporte_DevolucionViewSet
+from app.api.viewsets.recovermailViewSet import PasswordResetViewSet
 
 
 router = DefaultRouter()
@@ -20,11 +21,15 @@ router.register('comprobante_entrega', Comprobante_EntregaViewSet)
 router.register('reporte_devolucion', Reporte_DevolucionViewSet)
 
 
+
 #El auth
 router.register(r'auth', AuthViewSet, basename='auth')
+router.register(r'password-reset', PasswordResetViewSet, basename='password-reset')
 
 
 
 urlpatterns = [
-    path('', include(router.urls))
-]
+    path('password-reset/validate-token/<str:token>/', 
+         PasswordResetViewSet.as_view({'get': 'validate_token'}), 
+         name='validate-token'),
+] + router.urls
