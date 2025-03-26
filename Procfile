@@ -1,0 +1,1 @@
+web: gunicorn EntreGas_Server.wsgi --log-file -
