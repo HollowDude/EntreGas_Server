@@ -1,76 +1,52 @@
+from datetime import date
 from django.forms import ValidationError
 from rest_framework import viewsets, status
-from app.models.comprobante_entrega import Comprobante_Entrega
+from app.models.comprobante_entrega import Comprobante_Entrega, Cliente
 from rest_framework.response import Response
 from app.api.serializers.comprobante_entregaSerializer import Comprobante_EntregaSerializer
 from rest_framework.permissions import IsAuthenticated
-from app.api.permissions.trabajadorPermissions import IsJefeOrReadOnly
+from app.api.permissions.custom_permissions import CustomAccessPermission
+from app.api.utils import procesar_entrega, calcular_fecha_proximo_cilindro
+
 
 class Comprobante_EntregaViewSet(viewsets.ModelViewSet):
     queryset = Comprobante_Entrega.objects.select_related('cliente__user')
     serializer_class = Comprobante_EntregaSerializer
-    permission_classes = [IsAuthenticated, IsJefeOrReadOnly]
+    permission_classes = [IsAuthenticated, CustomAccessPermission]
 
     def create(self, request, *args, **kwargs):
         try:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
-            Comprobante_Entrega = serializer.save()
-            
+            comprobante = serializer.save()
 
-            return Response(self.get_serializer(Comprobante_Entrega).data, status=status.HTTP_201_CREATED)
+            try:
+                procesar_entrega(comprobante)
+            except ValidationError as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        except ValidationError as e:
-            return Response({'error' : str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({'error': f'Un error inesperado a ocurrido {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    def destroy(self, request, *args, **kwargs):
-        try:
-            
-            instance = self.get_object()
-            instance.delete()
+            direccion = comprobante.cliente.direccion
+            clientes_dir = Cliente.objects.filter(direccion=direccion)
+
+            clientes_dir.update(fecha_UT=comprobante.fecha)
+
+
+            fecha_norm = calcular_fecha_proximo_cilindro('normal')
+            clientes_dir.filter(tipo='normal').update(fecha_PC=fecha_norm)
+            fecha_esp = calcular_fecha_proximo_cilindro('especial')
+            clientes_dir.filter(tipo='especial').update(fecha_PC=fecha_esp)
 
             return Response(
-                {"message": f"Comprobante Entrega con id {kwargs['pk']} eliminado"},
-                status=status.HTTP_204_NO_CONTENT
+                self.get_serializer(comprobante).data,
+                status=status.HTTP_201_CREATED
             )
-        except ValidationError as e:
-            return Response({'error': str(e)}, status = status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({'error inesperado': f'Intenta again: {e}'}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-    def update(self, request, *args, **kwargs):
-        try:
 
-            instance = self.get_object(request.id)
-            serializer = self.get_serializer(instance, data=request.data)
-
-            serializer.is_valid(raise_exception=True)
-
-            serializer.save()
-
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        
-        except ValidationError as e:
-            return Response({'error': str(e)}, status = status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({'error inesperado': f'Intenta again: {e}'}, status = status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-    def partial_update(self, request, *args, **kwargs):
-        try:
-
-            instance = self.get_object()
-            serializer = self.get_serializer(instance, data=request.data, partial=True)
-
-            serializer.is_valid(raise_exception=True)
-
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        
         except ValidationError as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({'error': f'Error inesperado: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {'error': f'Un error inesperado ha ocurrido: {e}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
