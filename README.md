@@ -21,7 +21,11 @@ https://entregas-server.onrender.com/v1/
 
 ### Endpoints
 
+<<<<<<< HEAD
 ### 1. POST /v1/auth/login/
+=======
+### 1. POST /api/auth/login/
+>>>>>>> deefcce04c5c7979f71e91ac130616c92ea8e22f
 - **Description:** Logs in and creates server session
 - **Request Body (JSON):**
   ```json
@@ -65,7 +69,11 @@ https://entregas-server.onrender.com/v1/
   { "error": "Credenciales inválidas" }
   ```
 
+<<<<<<< HEAD
 ### 2. POST /v1/auth/logout/
+=======
+### 2. POST /api/auth/logout/
+>>>>>>> deefcce04c5c7979f71e91ac130616c92ea8e22f
 - **Description:** Logs out current session
 - **Headers:** Must send Django session cookie
 - **Permissions:** IsAuthenticated
@@ -74,7 +82,11 @@ https://entregas-server.onrender.com/v1/
   { "message": "Sesión cerrada" }
   ```
 
+<<<<<<< HEAD
 ### 3. GET /v1/auth/check_auth/
+=======
+### 3. GET /api/auth/check_auth/
+>>>>>>> deefcce04c5c7979f71e91ac130616c92ea8e22f
 - **Description:** Checks if session is active
 - **Headers:** Must send session cookie
 - **Permissions:** IsAuthenticated
