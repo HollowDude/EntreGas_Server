@@ -1,333 +1,216 @@
+# API Documentation
+
+## Table of Contents
+- [🔐 AuthViewSet](#-authviewset)
+- [🔑 PasswordResetViewSet](#-passwordresetviewset)
+- [🛢️ CilindroViewSet](#️-cilindroviewset)
+- [👷 TrabajadorViewSet](#-trabajadorviewset)
+- [👥 ClienteViewSet](#-clienteviewset)
+- [🚚 Comprobante_AbastecimientoViewSet](#-comprobante_abastecimientoviewset)
+- [🚚 Comprobante_EntregaViewSet](#-comprobante_entregaviewset)
+- [🔄 Reporte_DevolucionViewSet](#-reporte_devolucionviewset)
+
+---
 
 ## 🔐 AuthViewSet
 
 > **Base URL:** `/v1/auth/`  
-> **Autenticación:**
-> 
-> - `login` → **AllowAny**
->     
-> - `logout`, `check_auth` → **IsAuthenticated**
->     
-> - Usa _session cookies_ de Django, **ojo**: no es JWT.
->     
+> **Authentication:**
+> - login → **AllowAny**
+> - logout, check_auth → **IsAuthenticated**
+> - Uses Django _session cookies_ (not JWT)
 
----
+### Endpoints
 
-### 1. POST `/api/auth/login/`
-
-- **Descripción:** Inicia sesión y crea sesión en servidor.
-    
+### 1. POST /api/auth/login/
+- **Description:** Logs in and creates server session
 - **Request Body (JSON):**
-    
+  ```json
+  {
+    "username": "string",       // required
+    "password": "string",       // required
+    "recordar": true|false      // optional, default false
+  }
+  ```
+- **Behavior:**
+  - Validates credentials with authenticate()
+  - If recordar=true: session expires in 30 days; otherwise at browser close
+  - Detects if user is Trabajador or Cliente and returns appropriate data
+- **Successful Responses (200 OK):**
+  - **Trabajador**:
     ```json
     {
-      "username": "string",       // obligatorio
-      "password": "string",       // obligatorio
-      "recordar": true|false      // opcional, por defecto false
+      "message": "Inicio de sesión exitoso",
+      "tipo_usuario": "trabajador",
+      "puesto": "jefe de servicio",
+      "username": "pepito"
     }
     ```
-    
-- **Comportamiento:**
-    
-    - Valida credenciales con `authenticate()`.
-        
-    - Si `recordar: true`, la sesión expira en 30 días; si no, al cerrar el navegador.
-        
-    - Detecta si el usuario es Trabajador o Cliente y devuelve datos según modelo.
-        
-- **Respuestas exitosas (200 OK):**
-    
-    - **Trabajador**:
-        
-        ```json
-        {
-          "message": "Inicio de sesión exitoso",
-          "tipo_usuario": "trabajador",
-          "puesto": "jefe de servicio",
-          "username": "pepito"
-        }
-        ```
-        
-    - **Cliente**:
-        
-        ```json
-        {
-          "message": "Inicio de sesión exitoso",
-          "tipo_usuario": "cliente",
-          "tipo_cliente": "especial",
-          "username": "juanito"
-        }
-        ```
-        
-    - **Otro (superusuario u otro caso):**
-        
-        ```json
-        {
-          "message": "Inicio de sesión exitoso"
-        }
-        ```
-        
+  - **Cliente**:
+    ```json
+    {
+      "message": "Inicio de sesión exitoso",
+      "tipo_usuario": "cliente",
+      "tipo_cliente": "especial",
+      "username": "juanito"
+    }
+    ```
+  - **Other (superuser or other case)**:
+    ```json
+    {
+      "message": "Inicio de sesión exitoso"
+    }
+    ```
 - **Error (400 Bad Request):**
-    
-    ```json
-    { "error": "Credenciales inválidas" }
-    ```
-    
+  ```json
+  { "error": "Credenciales inválidas" }
+  ```
 
----
-
-### 2. POST `/api/auth/logout/`
-
-- **Descripción:** Cierra la sesión actual.
-    
-- **Headers:**
-    
-    - Debe enviar la cookie de sesión de Django.
-        
-- **Permisos:** `IsAuthenticated`
-    
+### 2. POST /api/auth/logout/
+- **Description:** Logs out current session
+- **Headers:** Must send Django session cookie
+- **Permissions:** IsAuthenticated
 - **Response (200 OK):**
-    
-    ```json
-    { "message": "Sesión cerrada" }
-    ```
-    
+  ```json
+  { "message": "Sesión cerrada" }
+  ```
 
----
-
-### 3. GET `/api/auth/check_auth/`
-
-- **Descripción:** Verifica si la sesión está activa.
-    
-- **Headers:**
-    
-    - Debe enviar la cookie de sesión.
-        
-- **Permisos:** `IsAuthenticated`
-    
+### 3. GET /api/auth/check_auth/
+- **Description:** Checks if session is active
+- **Headers:** Must send session cookie
+- **Permissions:** IsAuthenticated
 - **Response (200 OK):**
-    
-    ```json
-    { "username": "pepito" }
-    ```
-    
-> **Nota:** Estas llamadas manejan _session cookies_. Asegúrate de que tu cliente (frontend o Postman) permita y reenvíe cookies.
+  ```json
+  { "username": "pepito" }
+  ```
 
-
+> **Note:** These endpoints use _session cookies_. Ensure your client (frontend or Postman) allows and forwards cookies.
 
 ---
 
 ## 🔑 PasswordResetViewSet
 
 > **Base URL:** `/v1/password-reset/`  
-> **Permisos:** `AllowAny` (no auth requerida)  
-> **Métodos soportados:** `POST`, `GET`
+> **Permissions:** AllowAny (no auth required)  
+> **Supported Methods:** POST, GET
 
----
+### Serializers
 
-### 📄 Serializadores
+- **PasswordResetRequestSerializer**
+  ```python
+  class PasswordResetRequestSerializer(serializers.Serializer):
+      email = serializers.EmailField()
+  ```
 
-- **`PasswordResetRequestSerializer`**
-    
-    ```python
-    class PasswordResetRequestSerializer(serializers.Serializer):
-        email = serializers.EmailField()
-    ```
-    
-- **`PasswordResetConfirmSerializer`**
-    
-    ```python
-    class PasswordResetConfirmSerializer(serializers.Serializer):
-        token = serializers.CharField()
-        new_password = serializers.CharField(min_length=8)
-    ```
-    
+- **PasswordResetConfirmSerializer**
+  ```python
+  class PasswordResetConfirmSerializer(serializers.Serializer):
+      token = serializers.CharField()
+      new_password = serializers.CharField(min_length=8)
+  ```
 
----
+### Endpoints
 
-### 1. Solicitar enlace de recuperación
-
-- **Método:** `POST`
-    
+### 1. Request Reset Link
+- **Method:** POST
 - **URL:** `/v1/password-reset/request_reset/`
-    
 - **Body (JSON):**
-    
-    ```json
-    { "email": "usuario@uci.cu" }
-    ```
-    
-- **Flujo:**
-    
-    1. Valida que el correo exista.
-        
-    2. Genera un **access token** JWT con vida de 5 horas.
-        
-    3. Construye link:
-        
-        ```
-        http://localhost:5173/new-password/<token>
-        ```
-        
-    4. Envía correo con asunto “Recuperación de contraseña” y cuerpo:
-        
-        ```
-        Hola <username>,
-        
-        Para restablecer tu contraseña, haz click en el siguiente enlace:
-        
-        <link>
-        
-        El enlace expirará en 5 horas.
-        ```
-        
-- **Respuestas:**
-    
-    - **200 OK:**
-        
-        ```json
-        {
-          "detail": "Se ha enviado un enlace de recuperación a tu correo uci.",
-          "token": "<token>"
-        }
-        ```
-        
-    - **400 Bad Request:** errores de validación del serializer.
-        
-    - **404 Not Found:** `{ "detail": "No existe un usuario con este correo electrónico." }`
-        
-
----
-
-### 2. Validar token
-
-- **Método:** `GET`
-    
-- **URL:** `/v1/password-reset/validate_token/`
-    
-- **Query Params:** `?token=<token>`
-    
-- **Descripción:** Verifica que el JWT esté bien formado y no expirado.
-    
-- **Respuestas:**
-    
-    - **200 OK:** `{ "detail": "Token válido." }`
-        
-    - **400 Bad Request:**
-        
-        - Si no se pasa `token`: `{ "detail": "Token no proporcionado." }`
-            
-        - Si es inválido o expirado: `{ "detail": "Token inválido o expirado." }`
-            
-
----
-
-### 3. Restablecer contraseña
-
-- **Método:** `POST`
-    
-- **URL:** `/v1/password-reset/reset_password/`
-    
-- **Body (JSON):**
-    
+  ```json
+  { "email": "usuario@uci.cu" }
+  ```
+- **Flow:**
+  1. Validates email exists
+  2. Generates JWT access token (5 hour lifespan)
+  3. Builds link: `http://localhost:5173/new-password/<token>`
+  4. Sends email with subject "Recuperación de contraseña" and body:
+     ```
+     Hola <username>,
+     
+     Para restablecer tu contraseña, haz click en el siguiente enlace:
+     
+     <link>
+     
+     El enlace expirará en 5 horas.
+     ```
+- **Responses:**
+  - **200 OK:**
     ```json
     {
-      "token": "<token>",
-      "new_password": "nuevaContraseña123"
+      "detail": "Se ha enviado un enlace de recuperación a tu correo uci.",
+      "token": "<token>"
     }
     ```
-    
-- **Flujo:**
-    
-    1. Valida datos con `PasswordResetConfirmSerializer`.
-        
-    2. Decodifica el token; extrae `user_id`.
-        
-    3. Busca `User` y actualiza su contraseña.
-        
-- **Respuestas:**
-    
-    - **200 OK:** `{ "detail": "Contraseña actualizada correctamente." }`
-        
-    - **400 Bad Request:**
-        
-        - Errores de serializer.
-            
-        - Token inválido/expirado o usuario no existe:
-            
-            ```json
-            { "detail": "Token inválido o expirado." }
-            ```
-            
+  - **400 Bad Request:** serializer validation errors
+  - **404 Not Found:** `{ "detail": "No existe un usuario con este correo electrónico." }`
+
+### 2. Validate Token
+- **Method:** GET
+- **URL:** `/v1/password-reset/validate_token/`
+- **Query Params:** `?token=<token>`
+- **Description:** Verifies JWT is well-formed and not expired
+- **Responses:**
+  - **200 OK:** `{ "detail": "Token válido." }`
+  - **400 Bad Request:**
+    - If no token: `{ "detail": "Token no proporcionado." }`
+    - If invalid/expired: `{ "detail": "Token inválido o expirado." }`
+
+### 3. Reset Password
+- **Method:** POST
+- **URL:** `/v1/password-reset/reset_password/`
+- **Body (JSON):**
+  ```json
+  {
+    "token": "<token>",
+    "new_password": "nuevaContraseña123"
+  }
+  ```
+- **Flow:**
+  1. Validates data with PasswordResetConfirmSerializer
+  2. Decodes token; extracts user_id
+  3. Finds User and updates password
+- **Responses:**
+  - **200 OK:** `{ "detail": "Contraseña actualizada correctamente." }`
+  - **400 Bad Request:**
+    - Serializer errors
+    - Invalid/expired token or user doesn't exist:
+      ```json
+      { "detail": "Token inválido o expirado." }
+      ```
+
+> **Final Note:**
+> - Ensure you send the token correctly in each request
+> - The frontend URL (localhost:5173) should be adjusted for your production environment
+> - Email is sent from settings.DEFAULT_FROM_EMAIL
 
 ---
-
-> **Nota final:**
-> 
-> - Asegúrate de enviar correctamente el token en cada petición.
->     
-> - La URL de frontend (`localhost:5173`) debe ajustarse a tu entorno de producción.
->     
-> - El correo sale desde `settings.DEFAULT_FROM_EMAIL`.
-
-
-
----
-
-
 
 ## 🛢️ CilindroViewSet
 
 > **Base URL:** `/v1/cilindros/`  
-> **Permisos:**
-> 
+> **Permissions:**
 > - **IsAuthenticated**
->     
 > - **CustomAccessPermission**
->     
-> - Usa _session cookies_ o el esquema de autenticación que hayas configurado.
->     
+> - Uses _session cookies_ or your configured auth scheme
 
----
+### Model
+```python
+class Cilindro(models.Model):
+    num = CharField("Número de serie", blank=True, null=True, max_length=255)
+    fehca_llegada = DateField(default=date.today)
+    defectuoso = BooleanField(default=False)
+    lleno = BooleanField(default=True)
+    asign = ForeignKey(Cliente, on_delete=SET_NULL, null=True, blank=True)
+```
 
-### 1. Listar todos los cilindros
+### Endpoints
 
-- **Método:** `GET`
-    
+### 1. List All Cylinders
+- **Method:** GET
 - **URL:** `/v1/cilindros/`
-    
-- **Descripción:** Devuelve la lista completa de cilindros, incluyendo datos de asignación (`asign__user` con `select_related`).
-    
-- **Respuesta (200 OK):**
-    
-    ```json
-    [
-      {
-        "id": 1,
-        "num": "ABC123",
-        "fehca_llegada": "2025-05-09",
-        "defectuoso": false,
-        "lleno": true,
-        "asign": 5
-      },
-      { … }
-    ]
-    ```
-    
-
----
-
-### 2. Recuperar un cilindro por ID
-
-- **Método:** `GET`
-    
-- **URL:** `/v1/cilindros/{id}/`
-    
-- **Descripción:** Devuelve los datos del cilindro con el `id` especificado.
-    
-- **Respuesta (200 OK):**
-    
-    ```json
+- **Description:** Returns complete list of cylinders including assignment data
+- **Response (200 OK):**
+  ```json
+  [
     {
       "id": 1,
       "num": "ABC123",
@@ -335,237 +218,111 @@
       "defectuoso": false,
       "lleno": true,
       "asign": 5
-    }
-    ```
-    
+    },
+    { … }
+  ]
+  ```
+
+### 2. Retrieve Cylinder by ID
+- **Method:** GET
+- **URL:** `/v1/cilindros/{id}/`
+- **Response (200 OK):**
+  ```json
+  {
+    "id": 1,
+    "num": "ABC123",
+    "fehca_llegada": "2025-05-09",
+    "defectuoso": false,
+    "lleno": true,
+    "asign": 5
+  }
+  ```
 - **Error (404 Not Found):**
-    
-    ```json
-    { "detail": "Not found." }
-    ```
-    
+  ```json
+  { "detail": "Not found." }
+  ```
 
----
-
-### 3. Crear un nuevo cilindro
-
-- **Método:** `POST`
-    
+### 3. Create New Cylinder
+- **Method:** POST
 - **URL:** `/v1/cilindros/`
-    
 - **Body (JSON):**
-    
-    ```json
-    {
-      "num": "XYZ789",           // opcional, puede ir vacío o null
-      "fehca_llegada": "2025-05-10",
-      "defectuoso": false,
-      "lleno": true,
-      "asign": 3                 // ID de Cliente al que se asigna (o null)
-    }
-    ```
-    
-- **Respuesta exitosa (201 Created):**
-    
-    ```json
-    {
-      "id": 12,
-      "num": "XYZ789",
-      "fehca_llegada": "2025-05-10",
-      "defectuoso": false,
-      "lleno": true,
-      "asign": 3
-    }
-    ```
-    
-- **Error de validación (400 Bad Request):**
-    
-    ```json
-    { "error": "…detalle del ValidationError…" }
-    ```
-    
-- **Error inesperado (500):**
-    
-    ```json
-    { "error": "Un error inesperado ha ocurrido …" }
-    ```
-    
+  ```json
+  {
+    "num": "XYZ789",           // optional, can be empty or null
+    "fehca_llegada": "2025-05-10",
+    "defectuoso": false,
+    "lleno": true,
+    "asign": 3                 // ID of assigned Client (or null)
+  }
+  ```
+- **Success (201 Created):** Returns created cylinder
+- **Validation Error (400):** `{ "error": "…ValidationError…" }`
+- **Unexpected Error (500):** `{ "error": "Un error inesperado ha ocurrido …" }`
 
----
-
-### 4. Actualizar un cilindro (reemplazo total)
-
-- **Método:** `PUT`
-    
+### 4. Update Cylinder (Full Replacement)
+- **Method:** PUT
 - **URL:** `/v1/cilindros/{id}/`
-    
-- **Body (JSON):** (mismos campos que en create)
-    
-- **Respuesta exitosa (200 OK):**
-    
-    ```json
-    {
-      "id": 12,
-      "num": "XYZ789",
-      "fehca_llegada": "2025-05-10",
-      "defectuoso": false,
-      "lleno": true,
-      "asign": 4
-    }
-    ```
-    
-- **Error de validación (400):**
-    
-    ```json
-    { "error": "…detalle del ValidationError…" }
-    ```
-    
-- **Error inesperado (500):**
-    
-    ```json
-    { "error inesperado": "Intenta again: …" }
-    ```
-    
+- **Body:** Same fields as create
+- **Success (200 OK):** Returns updated cylinder
+- **Errors:** Same as create
 
----
-
-### 5. Actualizar parcialmente un cilindro
-
-- **Método:** `PATCH`
-    
+### 5. Partial Update
+- **Method:** PATCH
 - **URL:** `/v1/cilindros/{id}/`
-    
-- **Body (JSON):** (solo los campos a cambiar)
-    
-    ```json
-    { "defectuoso": true }
-    ```
-    
-- **Respuesta exitosa (200 OK):**
-    
-    ```json
-    {
-      "id": 12,
-      "num": "XYZ789",
-      "fehca_llegada": "2025-05-10",
-      "defectuoso": true,
-      "lleno": true,
-      "asign": 4
-    }
-    ```
-    
-- **Errores:** mismos que en PUT.
-    
+- **Body:** Only fields to update
+- **Success (200 OK):** Returns updated cylinder
+- **Errors:** Same as PUT
 
----
-
-### 6. Eliminar un cilindro
-
-- **Método:** `DELETE`
-    
+### 6. Delete Cylinder
+- **Method:** DELETE
 - **URL:** `/v1/cilindros/{id}/`
-    
-- **Respuesta exitosa (204 No Content):**
-    
-    ```json
-    { "message": "Cilindro con id {id} eliminado" }
-    ```
-    
-- **Error de validación (400):**
-    
-    ```json
-    { "error": "…detalle del ValidationError…" }
-    ```
-    
-- **Error inesperado (500):**
-    
-    ```json
-    { "error inesperado": "Intenta again: …" }
-    ```
-    
+- **Success (204 No Content):**
+  ```json
+  { "message": "Cilindro con id {id} eliminado" }
+  ```
+- **Errors:** Same as create
 
----
-
-### 7. Cilindros sin número de serie
-
-- **Método:** `GET`
-    
+### 7. Cylinders Without Serial Number
+- **Method:** GET
 - **URL:** `/v1/cilindros/sin-numero/`
-    
-- **Descripción:** Devuelve todos los cilindros donde `num` es `null` o `""`.
-    
-- **Respuesta (200 OK):**
-    
-    ```json
-    [
-      { "id": 3, "num": null, … },
-      { "id": 7, "num": "", … }
-    ]
-    ```
-    
+- **Description:** Returns cylinders where num is null or ""
+- **Response (200 OK):**
+  ```json
+  [
+    { "id": 3, "num": null, … },
+    { "id": 7, "num": "", … }
+  ]
+  ```
 
----
-
-### 8. Cilindros con número de serie
-
-- **Método:** `GET`
-    
+### 8. Cylinders With Serial Number
+- **Method:** GET
 - **URL:** `/v1/cilindros/con-numero/`
-    
-- **Descripción:** Devuelve todos los cilindros donde `num` no está vacío.
-    
-- **Respuesta (200 OK):**
-    
-    ```json
-    [
-      { "id": 1, "num": "ABC123", … },
-      { "id": 2, "num": "DEF456", … }
-    ]
-    ```
-    
+- **Description:** Returns cylinders where num is not empty
+- **Response (200 OK):**
+  ```json
+  [
+    { "id": 1, "num": "ABC123", … },
+    { "id": 2, "num": "DEF456", … }
+  ]
+  ```
 
----
-
-### 📋 Modelo `Cilindro`
-
-```python
-class Cilindro(models.Model):
-    num           = CharField("Número de serie", blank=True, null=True, max_length=255)
-    fehca_llegada = DateField(default=date.today)
-    defectuoso    = BooleanField(default=False)
-    lleno         = BooleanField(default=True)
-    asign         = ForeignKey(Cliente, on_delete=SET_NULL, null=True, blank=True)
-```
-
----
-
-> **Tip:** Asegúrate de que tu cliente reenvíe las cookies de sesión y tenga configurados los headers de autenticación correctamente.
-
-
+> **Tip:** Ensure your client forwards session cookies and has correct auth headers configured.
 
 ---
 
 ## 👷 TrabajadorViewSet
 
 > **Base URL:** `/v1/trabajador/`  
-> **Permisos:**
-> 
+> **Permissions:**
 > - **IsAuthenticated**
->     
 > - **CustomAccessPermission**
->     
->     - **Superusuario** o **Trabajador.puesto='administrador'**: acceso total.
->         
->     - **Jefe de servicio** y **Clientes**: **no** tienen permisos para este endpoint (salvo ver su propio recurso si el permiso de objeto lo permite).
->         
+>   - **Superuser** or **Trabajador.puesto='administrador'**: full access
+>   - **Jefe de servicio** and **Clientes**: no permissions for this endpoint
 
----
-
-### 📦 Modelo `Trabajador`
-
+### Model
 ```python
 class Trabajador(models.Model):
-    user  = OneToOneField(User, on_delete=CASCADE)
+    user = OneToOneField(User, on_delete=CASCADE)
     puesto = CharField(
         choices=[
             ("tecnico", "Tecnico"),
@@ -575,954 +332,549 @@ class Trabajador(models.Model):
     )
 ```
 
----
-
-### 🔄 Serializador
-
+### Serializer
 ```python
 class TrabajadorSerializer(serializers.ModelSerializer):
     user = UserSerializer()  # Nested
 
     class Meta:
-        model  = Trabajador
+        model = Trabajador
         fields = ['id', 'user', 'puesto']
 ```
 
-- **`UserSerializer`** maneja:
-    
-    - Campos: `id`, `username`, `password` (write-only), `first_name`, `last_name`, `email`
-        
-    - Valida dominio `@uci.cu` y unicidad de email.
-        
-    - Crea/actualiza el `User` con manejo de password.
-        
+### Endpoints
 
----
-
-### 1. Listar trabajadores
-
-- **Método:** `GET`
-    
+### 1. List Workers
+- **Method:** GET
 - **URL:** `/v1/trabajador/`
-    
-- **Permisos:** Solo administradores.
-    
-- **Descripción:** Lista todos los trabajadores con datos de usuario (`select_related('user')`).
-    
-- **Respuesta (200 OK):**
-    
-    ```json
-    [
-      {
-        "id": 1,
-        "user": {
-          "id": 2,
-          "username": "juan",
-          "first_name": "Juan",
-          "last_name": "Pérez",
-          "email": "juan@uci.cu"
-        },
-        "puesto": "tecnico"
-      },
-      …
-    ]
-    ```
-    
-
----
-
-### 2. Recuperar un trabajador
-
-- **Método:** `GET`
-    
-- **URL:** `/v1/trabajador/{id}/`
-    
-- **Permisos:** Solo administradores (o el mismo trabajador por permiso de objeto).
-    
-- **Descripción:** Detalles del trabajador `{id}`.
-    
-- **Respuesta (200 OK):** igual a la de **Listar**, pero un solo objeto.
-    
-- **Error (404):** `{ "detail": "Not found." }`
-    
-
----
-
-### 3. Crear trabajador
-
-- **Método:** `POST`
-    
-- **URL:** `/v1/trabajador/`
-    
-- **Body (JSON):**
-    
-    ```json
+- **Permissions:** Administrators only
+- **Response (200 OK):**
+  ```json
+  [
     {
+      "id": 1,
       "user": {
-        "username": "maria",
-        "password": "secreto123",
-        "first_name": "María",
-        "last_name": "González",
-        "email": "maria@uci.cu"
+        "id": 2,
+        "username": "juan",
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "email": "juan@uci.cu"
       },
-      "puesto": "jefe de servicio"
-    }
-    ```
-    
-- **Respuestas:**
-    
-    - **201 Created:** objeto `Trabajador` creado con usuario anidado.
-        
-    - **400 Bad Request:** `{ "error": "…ValidationError…" }`
-        
-    - **500 Internal Server Error:** `{ "error": "Un error inesperado ha ocurrido …" }`
-        
+      "puesto": "tecnico"
+    },
+    …
+  ]
+  ```
 
----
-
-### 4. Actualizar trabajador (reemplazo total)
-
-- **Método:** `PUT`
-    
+### 2. Retrieve Worker
+- **Method:** GET
 - **URL:** `/v1/trabajador/{id}/`
-    
-- **Body:** mismos campos que en **create**.
-    
-- **Permisos:** Solo administradores.
-    
-- **Respuestas:**
-    
-    - **200 OK:** datos actualizados.
-        
-    - **400 / 500:** `{ "error": … }`
-        
+- **Permissions:** Administrators (or same worker via object permission)
+- **Response (200 OK):** Same as list but single object
+- **Error (404):** `{ "detail": "Not found." }`
 
----
+### 3. Create Worker
+- **Method:** POST
+- **URL:** `/v1/trabajador/`
+- **Body (JSON):**
+  ```json
+  {
+    "user": {
+      "username": "maria",
+      "password": "secreto123",
+      "first_name": "María",
+      "last_name": "González",
+      "email": "maria@uci.cu"
+    },
+    "puesto": "jefe de servicio"
+  }
+  ```
+- **Responses:**
+  - **201 Created:** Created Trabajador with nested user
+  - **400 Bad Request:** `{ "error": "…ValidationError…" }`
+  - **500 Internal Server Error:** `{ "error": "Un error inesperado ha ocurrido …" }`
 
-### 5. Actualizar parcialmente
-
-- **Método:** `PATCH`
-    
+### 4. Update Worker (Full Replacement)
+- **Method:** PUT
 - **URL:** `/v1/trabajador/{id}/`
-    
-- **Body:** solo los campos a modificar, por ejemplo:
-    
+- **Body:** Same fields as create
+- **Permissions:** Administrators only
+- **Responses:**
+  - **200 OK:** Updated data
+  - **400 / 500:** `{ "error": … }`
+
+### 5. Partial Update
+- **Method:** PATCH
+- **URL:** `/v1/trabajador/{id}/`
+- **Body:** Only fields to update
+- **Permissions:** Administrators only
+- **Responses:** Same as PUT, success → 200 OK
+
+### 6. Delete Worker
+- **Method:** DELETE
+- **URL:** `/v1/trabajador/{id}/`
+- **Permissions:** Administrators only
+- **Responses:**
+  - **204 No Content:**
     ```json
-    { "puesto": "tecnico" }
+    { "message": "Trabajador con id {id} eliminado" }
     ```
-    
-- **Permisos:** Solo administradores.
-    
-- **Respuestas:** mismas que en **PUT**, éxito → 200 OK.
-    
+  - **400 / 500:** `{ "error": … }`
 
----
-
-### 6. Eliminar trabajador
-
-- **Método:** `DELETE`
-    
-- **URL:** `/v1/trabajador/{id}/`
-    
-- **Permisos:** Solo administradores.
-    
-- **Respuestas:**
-    
-    - **204 No Content:**
-        
-        ```json
-        { "message": "Trabajador con id {id} eliminado" }
-        ```
-        
-    - **400 / 500:** `{ "error": … }`
-        
-
----
-
-> **Nota final:**
-> 
-> - Asegúrate de reenviar cookies de sesión o token de autenticación en cada petición.
->     
-> - Solo los administradores pueden gestionar trabajadores; el resto recibirá **403 Forbidden**.
->
-
+> **Final Note:**
+> - Ensure you forward session cookies or auth token in each request
+> - Only administrators can manage workers; others will get **403 Forbidden**
 
 ---
 
 ## 👥 ClienteViewSet
 
 > **Base URL:** `/v1/clientes/`  
-> **Permisos:**
-> 
+> **Permissions:**
 > - **IsAuthenticated**
->     
 > - **CustomAccessPermission**
->     
->     - **Superuser** o **Trabajador.puesto='administrador'**: acceso total.
->         
->     - **Jefe de servicio**: listar clientes, cilindros; crear comprobantes.
->         
->     - **Cliente**: listar cilindros; crear devoluciones; ver/editar su propio perfil.
->         
+>   - **Superuser** or **Trabajador.puesto='administrador'**: full access
+>   - **Jefe de servicio**: list clients, cylinders; create receipts
+>   - **Cliente**: list cylinders; create returns; view/edit own profile
 
----
+### Serializer: ClienteSerializer
+- **Fields:**
+  - user (nested with @uci.cu email validation and password handling)
+  - id
+  - direccion
+  - tipo (normal | especial)
+  - fecha_UT (≤ today)
+  - fecha_PC
+- **create:** creates User + Cliente
+- **update:** updates User and/or Cliente data
 
-### 📒 Serializador: `ClienteSerializer`
+### Endpoints
 
-- **Campos:**
-    
-    - `user` (anidado con validación de correo `@uci.cu` y manejo de password)
-        
-    - `id`
-        
-    - `direccion`
-        
-    - `tipo` (`normal` | `especial`)
-        
-    - `fecha_UT` (≤ hoy)
-        
-    - `fecha_PC`
-        
-- **create:** crea `User` + `Cliente`.
-    
-- **update:** actualiza datos de `User` y/o `Cliente`.
-    
-
----
-
-### 1. Listar clientes
-
-- **Método:** `GET`
-    
+### 1. List Clients
+- **Method:** GET
 - **URL:** `/v1/clientes/`
-    
-- **Descripción:** Devuelve todos los clientes con datos de usuario (`select_related('user')`).
-    
+- **Description:** Returns all clients with user data
 
----
-
-### 2. Recuperar cliente por ID
-
-- **Método:** `GET`
-    
+### 2. Retrieve Client by ID
+- **Method:** GET
 - **URL:** `/v1/clientes/{id}/`
-    
-- **Descripción:** Detalles del cliente `{id}`.
-    
+- **Description:** Details of client {id}
 
----
-
-### 3. Crear cliente
-
-- **Método:** `POST`
-    
+### 3. Create Client
+- **Method:** POST
 - **URL:** `/v1/clientes/`
-    
 - **Body (JSON):**
-    
-    ```json
-    {
-      "user": {
-        "username": "pepita",
-        "password": "secreto123",
-        "first_name": "Pepita",
-        "last_name": "González",
-        "email": "pepita@uci.cu"
-      },
-      "direccion": "Calle 123",
-      "tipo": "normal",
-      "fecha_UT": "2025-05-08",
-      "fecha_PC": "2025-05-09"
-    }
-    ```
-    
-- **Respuestas:**
-    
-    - **201 Created:** objeto `Cliente` con `user` anidado.
-        
-    - **400 Bad Request:** `{ "error": "…ValidationError…" }`
-        
-    - **500 Internal Server Error:** `{ "error": "Un error inesperado ha ocurrido …" }`
-        
+  ```json
+  {
+    "user": {
+      "username": "pepita",
+      "password": "secreto123",
+      "first_name": "Pepita",
+      "last_name": "González",
+      "email": "pepita@uci.cu"
+    },
+    "direccion": "Calle 123",
+    "tipo": "normal",
+    "fecha_UT": "2025-05-08",
+    "fecha_PC": "2025-05-09"
+  }
+  ```
+- **Responses:**
+  - **201 Created:** Cliente object with nested user
+  - **400 Bad Request:** `{ "error": "…ValidationError…" }`
+  - **500 Internal Server Error:** `{ "error": "Un error inesperado ha ocurrido …" }`
 
----
-
-### 4. Actualizar cliente (reemplazo total)
-
-- **Método:** `PUT`
-    
+### 4. Update Client (Full Replacement)
+- **Method:** PUT
 - **URL:** `/v1/clientes/{id}/`
-    
-- **Body:** mismos campos que en **create**.
-    
-- **Respuestas:**
-    
-    - **200 OK:** datos actualizados.
-        
-    - **400 / 500:** estructura de error igual a **create**.
-        
+- **Body:** Same fields as create
+- **Responses:**
+  - **200 OK:** Updated data
+  - **400 / 500:** Same error structure as create
 
----
-
-### 5. Actualizar parcialmente cliente
-
-- **Método:** `PATCH`
-    
+### 5. Partial Update
+- **Method:** PATCH
 - **URL:** `/v1/clientes/{id}/`
-    
-- **Body:** solo campos a modificar.
-    
-- **Respuestas:** mismas que en **PUT**, pero 200 OK para éxito.
-    
+- **Body:** Only fields to update
+- **Responses:** Same as PUT, but 200 OK for success
 
----
-
-### 6. Eliminar cliente
-
-- **Método:** `DELETE`
-    
+### 6. Delete Client
+- **Method:** DELETE
 - **URL:** `/v1/clientes/{id}/`
-    
-- **Respuestas:**
-    
-    - **204 No Content:** `{ "message": "Cliente con id {id} eliminado" }`
-        
-    - **400 / 500:** detalles en `{ "error": … }`
-        
+- **Responses:**
+  - **204 No Content:** `{ "message": "Cliente con id {id} eliminado" }`
+  - **400 / 500:** Details in `{ "error": … }`
 
----
-
-> **Importante:**
-> 
-> - Asegura que el cliente envíe y reciba cookies de sesión (o el esquema auth configurado).
->     
-> - La validación de `email` sólo acepta `@uci.cu` y evita duplicados.
->     
-> - Sólo los clientes pueden modificar su propio recurso (`has_object_permission`).
-
-
-
+> **Important:**
+> - Ensure client sends/receives session cookies (or configured auth scheme)
+> - Email validation only accepts @uci.cu and prevents duplicates
+> - Only clients can modify their own resource (has_object_permission)
 
 ---
 
 ## 🚚 Comprobante_AbastecimientoViewSet
 
 > **Base URL:** `/v1/comprobante_abastecimiento/`  
-> **Permisos:**
-> 
-> - `IsAuthenticated`
->     
-> - `CustomAccessPermission`
->     
->     - Superusuario / Trabajador administrador: acceso completo.
->         
->     - Jefe de servicio: puede **crear** comprobantes de abastecimiento y listarlos.
->         
->     - Clientes: no tienen acceso a este endpoint según permisos.
->         
+> **Permissions:**
+> - IsAuthenticated
+> - CustomAccessPermission
+>   - Superuser / Trabajador administrador: full access
+>   - Jefe de servicio: can **create** supply receipts and list them
+>   - Clients: no access to this endpoint per permissions
 
----
-
-### 📦 Modelo `Comprobante_Abastecimiento`
-
+### Model
 ```python
 class Comprobante_Abastecimiento(models.Model):
-    fecha             = DateField()
-    cant_cilindros    = IntegerField()
-    proveedor         = CharField(max_length=50)
+    fecha = DateField()
+    cant_cilindros = IntegerField()
+    proveedor = CharField(max_length=50)
     trabajador_recivio = ForeignKey(Trabajador, on_delete=CASCADE)
 ```
 
----
-
-### 🔄 Serializador
-
+### Serializer
 ```python
 class Comprobante_AbastecimientoSerializer(serializers.ModelSerializer):
     class Meta:
-        model  = Comprobante_Abastecimiento
+        model = Comprobante_Abastecimiento
         fields = '__all__'
 ```
 
----
+### Endpoints
 
-### 1. Listar comprobantes
-
-- **Método:** `GET`
-    
+### 1. List Receipts
+- **Method:** GET
 - **URL:** `/v1/comprobante_abastecimiento/`
-    
-- **Descripción:** Lista todos los comprobantes, incluye datos de `trabajador_recivio__user` gracias a `select_related`.
-    
-- **Respuesta (200 OK):**
-    
-    ```json
-    [
-      {
-        "id": 1,
-        "fecha": "2025-05-09",
-        "cant_cilindros": 10,
-        "proveedor": "GasCorp",
-        "trabajador_recivio": 4
-      },
-      …
-    ]
-    ```
-    
-
----
-
-### 2. Recuperar un comprobante
-
-- **Método:** `GET`
-    
-- **URL:** `/v1/comprobante_abastecimiento/{id}/`
-    
-- **Descripción:** Detalles del comprobante `{id}`.
-    
-- **Respuesta (200 OK):**
-    
-    ```json
+- **Description:** Lists all receipts with trabajador_recivio__user data
+- **Response (200 OK):**
+  ```json
+  [
     {
       "id": 1,
       "fecha": "2025-05-09",
       "cant_cilindros": 10,
       "proveedor": "GasCorp",
       "trabajador_recivio": 4
-    }
-    ```
-    
+    },
+    …
+  ]
+  ```
+
+### 2. Retrieve Receipt
+- **Method:** GET
+- **URL:** `/v1/comprobante_abastecimiento/{id}/`
+- **Description:** Details of receipt {id}
+- **Response (200 OK):**
+  ```json
+  {
+    "id": 1,
+    "fecha": "2025-05-09",
+    "cant_cilindros": 10,
+    "proveedor": "GasCorp",
+    "trabajador_recivio": 4
+  }
+  ```
 - **Error (404):** `{ "detail": "Not found." }`
-    
 
----
-
-### 3. Crear comprobante
-
-- **Método:** `POST`
-    
+### 3. Create Receipt
+- **Method:** POST
 - **URL:** `/v1/comprobante_abastecimiento/`
-    
 - **Body (JSON):**
-    
+  ```json
+  {
+    "fecha": "2025-05-10",
+    "cant_cilindros": 5,
+    "proveedor": "GasProvider",
+    "trabajador_recivio": 3      // Worker ID
+  }
+  ```
+- **Additional Behavior:**  
+  On creation, calls crear_cilindros_abastecimiento(fecha, cantidad) which:
+  - Generates quantity cylinders with:
+    - fehca_llegada = fecha
+    - defectuoso = False
+    - lleno = True
+    - asign = null
+  - Inserts them via bulk_create
+- **Responses:**
+  - **201 Created:** New receipt data
+  - **400 Bad Request:** `{ "error": "…ValidationError…" }`
+  - **500 Internal Server Error:** `{ "error": "Un error inesperado ha ocurrido: …" }`
+
+### 4. Update Receipt
+- **Method:** PUT
+- **URL:** `/v1/comprobante_abastecimiento/{id}/`
+- **Body:** Same fields as create
+- **Responses:**
+  - **200 OK:** Updated receipt
+  - **400 / 500:** `{ "error": … }`
+
+### 5. Partial Update
+- **Method:** PATCH
+- **URL:** `/v1/comprobante_abastecimiento/{id}/`
+- **Body:** Only fields to update
+- **Responses:** Same as PUT, but 200 OK for success
+
+### 6. Delete Receipt
+- **Method:** DELETE
+- **URL:** `/v1/comprobante_abastecimiento/{id}/`
+- **Responses:**
+  - **204 No Content:**
     ```json
-    {
-      "fecha": "2025-05-10",
-      "cant_cilindros": 5,
-      "proveedor": "GasProvider",
-      "trabajador_recivio": 3      // ID de Trabajador
-    }
+    { "message": "Comprobante_Abastecimiento con id {id} eliminado" }
     ```
-    
-- **Comportamiento adicional:**  
-    Al crearse, invoca `crear_cilindros_abastecimiento(fecha, cantidad)` que:
-    
-    - Genera `cantidad` cilindros con:
-        
-        - `fehca_llegada = fecha`
-            
-        - `defectuoso = False`
-            
-        - `lleno = True`
-            
-        - `asign = null`
-            
-    - Los inserta vía `bulk_create`.
-        
-- **Respuestas:**
-    
-    - **201 Created:** datos del nuevo comprobante.
-        
-    - **400 Bad Request:** `{ "error": "…ValidationError…" }`
-        
-    - **500 Internal Server Error:** `{ "error": "Un error inesperado ha ocurrido: …" }`
-        
+  - **400 / 500:** `{ "error": … }`
 
----
+## Key Utilities
+- **crear_cilindros_abastecimiento(fecha: date, cantidad: int)**  
+  Creates new unassigned cylinders for supply
+- **calcular_fecha_proximo_cilindro(tipo: str) -> date**  
+  Returns next refill date based on client type
+- **procesar_entrega(comprobante)**  
+  Assigns and rotates cylinders between client and stock, validating availability
 
-### 4. Actualizar comprobante
-
-- **Método:** `PUT`
-    
-- **URL:** `/v1/comprobante_abastecimiento/{id}/`
-    
-- **Body:** mismos campos que en **create**.
-    
-- **Respuestas:**
-    
-    - **200 OK:** comprobante actualizado.
-        
-    - **400 / 500:** `{ "error": … }`
-        
-
----
-
-### 5. Actualizar parcialmente
-
-- **Método:** `PATCH`
-    
-- **URL:** `/v1/comprobante_abastecimiento/{id}/`
-    
-- **Body:** solo campos a modificar, e.g.
-    
-    ```json
-    { "proveedor": "NuevoProveedor" }
-    ```
-    
-- **Respuestas:** idénticas a **PUT**, pero 200 OK para éxito.
-    
-
----
-
-### 6. Eliminar comprobante
-
-- **Método:** `DELETE`
-    
-- **URL:** `/v1/comprobante_abastecimiento/{id}/`
-    
-- **Respuestas:**
-    
-    - **204 No Content:**
-        
-        ```json
-        { "message": "Comprobante_Abastecimiento con id {id} eliminado" }
-        ```
-        
-    - **400 / 500:** `{ "error": … }`
-        
-
----
-
-## 🛠️ Utilidades disponibles
-
-- **`crear_cilindros_abastecimiento(fecha: date, cantidad: int)`**  
-    Crea cilindros nuevos sin asignar para abastecimiento.
-    
-- **`calcular_fecha_proximo_cilindro(tipo: str) -> date`**  
-    Retorna fecha de próxima recarga según tipo de cliente (`normal` +2 meses, `especial` +1 mes).
-    
-- **`procesar_entrega(comprobante)`**  
-    Asigna y rota cilindros entre cliente y stock, validando disponibilidad.
-    
-
----
-
-> **Tip rápido:** Verifica que tu cliente incluya cookies de sesión o token de autenticación en cada petición; sin ellas, recibirás un 401.
-
+> **Quick Tip:** Verify your client includes session cookies or auth token in each request; without them you'll get a 401.
 
 ---
 
 ## 🚚 Comprobante_EntregaViewSet
 
 > **Base URL:** `/v1/comprobante_entrega/`  
-> **Permisos:**
-> 
-> - `IsAuthenticated`
->     
-> - `CustomAccessPermission`
->     
->     - **Jefe de servicio**: puede crear/listar entregas.
->         
->     - **Cliente**: puede crear devoluciones, pero no entregas—según permisos.
->         
+> **Permissions:**
+> - IsAuthenticated
+> - CustomAccessPermission
+>   - **Jefe de servicio**: can create/list deliveries
+>   - **Cliente**: can create returns, but not deliveries—per permissions
 
----
-
-### 📦 Modelo `Comprobante_Entrega`
-
+### Model
 ```python
 class Comprobante_Entrega(models.Model):
-    fecha      = DateField()
-    cliente    = ForeignKey(Cliente, on_delete=CASCADE)
-    cilindroE  = ForeignKey(Cilindro, on_delete=CASCADE, related_name='comprobantes_entrada')
-    cilindroS  = ForeignKey(Cilindro, on_delete=CASCADE, related_name='comprobantes_salida')
+    fecha = DateField()
+    cliente = ForeignKey(Cliente, on_delete=CASCADE)
+    cilindroE = ForeignKey(Cilindro, on_delete=CASCADE, related_name='comprobantes_entrada')
+    cilindroS = ForeignKey(Cilindro, on_delete=CASCADE, related_name='comprobantes_salida')
 ```
 
----
-
-### 🔄 Serializador
-
+### Serializer
 ```python
 class Comprobante_EntregaSerializer(serializers.ModelSerializer):
     class Meta:
-        model  = Comprobante_Entrega
+        model = Comprobante_Entrega
         fields = '__all__'
 ```
 
----
+### Endpoints
 
-### 1. Listar comprobantes de entrega
-
-- **Método:** `GET`
-    
+### 1. List Delivery Receipts
+- **Method:** GET
 - **URL:** `/v1/comprobante_entrega/`
-    
-- **Descripción:** Devuelve todas las entregas, con datos anidados de `cliente__user`.
-    
-- **Respuesta (200 OK):**
-    
-    ```json
-    [
-      {
-        "id": 1,
-        "fecha": "2025-05-09",
-        "cliente": 7,
-        "cilindroE": 12,
-        "cilindroS": 5
-      },
-      …
-    ]
-    ```
-    
-
----
-
-### 2. Recuperar una entrega
-
-- **Método:** `GET`
-    
-- **URL:** `/v1/comprobante_entrega/{id}/`
-    
-- **Descripción:** Detalles de la entrega `{id}`.
-    
-- **Respuesta (200 OK):**
-    
-    ```json
+- **Description:** Returns all deliveries with nested cliente__user data
+- **Response (200 OK):**
+  ```json
+  [
     {
       "id": 1,
       "fecha": "2025-05-09",
       "cliente": 7,
       "cilindroE": 12,
       "cilindroS": 5
-    }
-    ```
-    
+    },
+    …
+  ]
+  ```
+
+### 2. Retrieve Delivery
+- **Method:** GET
+- **URL:** `/v1/comprobante_entrega/{id}/`
+- **Description:** Details of delivery {id}
+- **Response (200 OK):**
+  ```json
+  {
+    "id": 1,
+    "fecha": "2025-05-09",
+    "cliente": 7,
+    "cilindroE": 12,
+    "cilindroS": 5
+  }
+  ```
 - **Error (404):** `{ "detail": "Not found." }`
-    
 
----
-
-### 3. Crear comprobante de entrega
-
-- **Método:** `POST`
-    
+### 3. Create Delivery Receipt
+- **Method:** POST
 - **URL:** `/v1/comprobante_entrega/`
-    
 - **Body (JSON):**
-    
+  ```json
+  {
+    "fecha": "2025-05-10",
+    "cliente": 7,
+    "cilindroE": 12,
+    "cilindroS": 5
+  }
+  ```
+- **Creation Flow:**
+  1. Saves receipt
+  2. Calls procesar_entrega(comprobante):
+     - Finds available cylinder (unassigned, full, not defective)
+     - Assigns cilindroE to client and removes cilindroS
+     - Updates both cylinders (asign, lleno)
+     - If no cylinders, returns 400 with `{ "error": "No hay cilindros disponibles para asignar." }`
+  3. Updates **all** clients with same destination address:
+     - fecha_UT = comprobante.fecha
+     - fecha_PC based on type:
+       - "normal" → today + 2 months
+       - "especial" → today + 1 month
+- **Responses:**
+  - **201 Created:** Receipt data
+  - **400 Bad Request:**
+    - Initial validation: `{ "error": "…ValidationError…" }`
+    - Error in procesar_entrega: `{ "error": "No hay cilindros disponibles para asignar." }`
+  - **500 Internal Server Error:** `{ "error": "Un error inesperado ha ocurrido: …" }`
+
+### 4. Update Delivery
+- **Method:** PUT
+- **URL:** `/v1/comprobante_entrega/{id}/`
+- **Body:** Same fields as create
+- **Responses:**
+  - **200 OK:** Updated receipt
+  - **400 / 500:** `{ "error": … }`
+
+### 5. Partial Update
+- **Method:** PATCH
+- **URL:** `/v1/comprobante_entrega/{id}/`
+- **Body:** Only fields to update
+- **Responses:** Same as PUT, success → 200 OK
+
+### 6. Delete Delivery
+- **Method:** DELETE
+- **URL:** `/v1/comprobante_entrega/{id}/`
+- **Responses:**
+  - **204 No Content:**
     ```json
-    {
-      "fecha": "2025-05-10",
-      "cliente": 7,
-      "cilindroE": 12,
-      "cilindroS": 5
-    }
+    { "message": "Comprobante_Entrega con id {id} eliminado" }
     ```
-    
-- **Flujo de creación:**
-    
-    1. Guarda el comprobante.
-        
-    2. Llama a `procesar_entrega(comprobante)`:
-        
-        - Busca un cilindro disponible (no asignado, lleno, no defectuoso).
-            
-        - Asigna `cilindroE` al cliente y retira `cilindroS`.
-            
-        - Actualiza ambos cilindros (`asign`, `lleno`).
-            
-        - Si no hay cilindros, devuelve 400 con `{ "error": "No hay cilindros disponibles para asignar." }`.
-            
-    3. Actualiza **todos** los clientes con la misma `direccion` del destinatario:
-        
-        - `fecha_UT = comprobante.fecha`
-            
-        - `fecha_PC` según tipo:
-            
-            - `"normal"` → hoy + 2 meses
-                
-            - `"especial"` → hoy + 1 mes
-                
-- **Respuestas:**
-    
-    - **201 Created:** datos del comprobante.
-        
-    - **400 Bad Request:**
-        
-        - Validación inicial: `{ "error": "…ValidationError…" }`
-            
-        - Error en `procesar_entrega`: `{ "error": "No hay cilindros disponibles para asignar." }`
-            
-    - **500 Internal Server Error:** `{ "error": "Un error inesperado ha ocurrido: …" }`
-        
+  - **400 / 500:** `{ "error": … }`
 
----
+## Key Utilities
+- **procesar_entrega(comprobante)**  
+  Assigns and rotates cylinders between stock and client; raises ValidationError if no cylinders available
+- **calcular_fecha_proximo_cilindro(tipo: str) -> date**  
+  Returns next refill date:
+  - normal: today + 2 months
+  - especial: today + 1 month
 
-### 4. Actualizar entrega
-
-- **Método:** `PUT`
-    
-- **URL:** `/v1/comprobante_entrega/{id}/`
-    
-- **Body:** mismos campos que en **create**.
-    
-- **Respuestas:**
-    
-    - **200 OK:** comprobante actualizado.
-        
-    - **400 / 500:** `{ "error": … }`
-        
-
----
-
-### 5. Actualizar parcialmente
-
-- **Método:** `PATCH`
-    
-- **URL:** `/v1/comprobante_entrega/{id}/`
-    
-- **Body:** solo los campos a modificar.
-    
-- **Respuestas:** idénticas a **PUT**, éxito → 200 OK.
-    
-
----
-
-### 6. Eliminar entrega
-
-- **Método:** `DELETE`
-    
-- **URL:** `/v1/comprobante_entrega/{id}/`
-    
-- **Respuestas:**
-    
-    - **204 No Content:**
-        
-        ```json
-        { "message": "Comprobante_Entrega con id {id} eliminado" }
-        ```
-        
-    - **400 / 500:** `{ "error": … }`
-        
-
----
-
-## 🛠️ Utilidades clave
-
-- **`procesar_entrega(comprobante)`**  
-    Asigna y rota cilindros entre stock y cliente; lanza `ValidationError` si no hay cilindros disponibles.
-    
-- **`calcular_fecha_proximo_cilindro(tipo: str) -> date`**  
-    Devuelve fecha de próxima recarga:
-    
-    - `normal`: hoy + 2 meses
-        
-    - `especial`: hoy + 1 mes
-        
-
----
-
-> **Consejo:** Prueba primero en Postman o tu cliente REST, verifica cookies/autenticación y observa la agrupación por `direccion`.
-
-
+> **Tip:** Test first in Postman or your REST client, verify cookies/auth and observe grouping by address.
 
 ---
 
 ## 🔄 Reporte_DevolucionViewSet
 
 > **Base URL:** `/v1/reporte_devolucion/`  
-> **Permisos:**
-> 
-> - `IsAuthenticated`
->     
-> - `CustomAccessPermission`
->     
->     - **Superuser** / **Trabajador administrador**: acceso total (list, retrieve, create, etc.).
->         
->     - **Jefe de servicio**: puede **listar** y **recuperar** reportes de devolución.
->         
->     - **Cliente**: puede **crear** su propio reporte de devolución.
->         
+> **Permissions:**
+> - IsAuthenticated
+> - CustomAccessPermission
+>   - **Superuser** / **Trabajador administrador**: full access (list, retrieve, create, etc.)
+>   - **Jefe de servicio**: can **list** and **retrieve** return reports
+>   - **Cliente**: can **create** their own return report
 
----
-
-### 📦 Modelo `Reporte_Devolucion`
-
+### Model
 ```python
 class Reporte_Devolucion(models.Model):
-    fecha    = DateField()
-    cliente  = ForeignKey(Cliente, on_delete=CASCADE)
+    fecha = DateField()
+    cliente = ForeignKey(Cliente, on_delete=CASCADE)
     cilindro = ForeignKey(Cilindro, on_delete=CASCADE)
-    defecto  = TextField(max_length=255)
+    defecto = TextField(max_length=255)
 ```
 
----
-
-### 🔄 Serializador
-
+### Serializer
 ```python
 class Reporte_DevolucionSerializer(serializers.ModelSerializer):
     class Meta:
-        model            = Reporte_Devolucion
-        fields           = '__all__'
+        model = Reporte_Devolucion
+        fields = '__all__'
         read_only_fields = ('cliente', 'cilindro', 'fecha')
 ```
 
-- **Campos de solo lectura:**
-    
-    - `fecha` (se asigna `date.today()`)
-        
-    - `cliente` (que hace la petición)
-        
-    - `cilindro` (el asignado al cliente)
-        
+### Endpoints
 
----
-
-### 1. Listar reportes
-
-- **Método:** `GET`
-    
+### 1. List Reports
+- **Method:** GET
 - **URL:** `/v1/reporte_devolucion/`
-    
-- **Acceso:** Superusuario, Trabajadores (cualquier puesto) y Jefe de servicio.
-    
-- **Descripción:** Devuelve todos los reportes con datos de `cliente__user`.
-    
-- **Respuesta (200 OK):**
-    
-    ```json
-    [
-      {
-        "id": 1,
-        "fecha": "2025-05-10",
-        "cliente": 7,
-        "cilindro": 12,
-        "defecto": "Fuga en la válvula"
-      },
-      …
-    ]
-    ```
-    
-
----
-
-### 2. Recuperar un reporte
-
-- **Método:** `GET`
-    
-- **URL:** `/v1/reporte_devolucion/{id}/`
-    
-- **Acceso:** Igual que **Listar**.
-    
-- **Descripción:** Muestra detalle del reporte `{id}`.
-    
-- **Respuesta (200 OK):**
-    
-    ```json
+- **Access:** Superuser, Workers (any position) and Jefe de servicio
+- **Description:** Returns all reports with cliente__user data
+- **Response (200 OK):**
+  ```json
+  [
     {
       "id": 1,
       "fecha": "2025-05-10",
       "cliente": 7,
       "cilindro": 12,
       "defecto": "Fuga en la válvula"
-    }
-    ```
-    
+    },
+    …
+  ]
+  ```
+
+### 2. Retrieve Report
+- **Method:** GET
+- **URL:** `/v1/reporte_devolucion/{id}/`
+- **Access:** Same as List
+- **Description:** Shows details of report {id}
+- **Response (200 OK):**
+  ```json
+  {
+    "id": 1,
+    "fecha": "2025-05-10",
+    "cliente": 7,
+    "cilindro": 12,
+    "defecto": "Fuga en la válvula"
+  }
+  ```
 - **Error (404):** `{ "detail": "Not found." }`
-    
 
----
-
-### 3. Crear reporte
-
-- **Método:** `POST`
-    
+### 3. Create Report
+- **Method:** POST
 - **URL:** `/v1/reporte_devolucion/`
-    
-- **Acceso:** Sólo **Clientes** autenticados.
-    
+- **Access:** Only authenticated **Clients**
 - **Body (JSON):**
-    
+  ```json
+  {
+    "defecto": "Descripción del defecto (máx. 255 caracteres)"
+  }
+  ```
+- **Creation Flow:**
+  1. Validates defecto
+  2. Finds cylinder assigned to client (get_object_or_404(Cilindro, asign=cliente))
+  3. Creates Reporte_Devolucion with:
+     - fecha = date.today()
+     - cliente = authenticated user
+     - cilindro = found cylinder
+- **Responses:**
+  - **201 Created:** Newly created Reporte_Devolucion
+  - **400 Bad Request:** `{ "error": "…ValidationError…" }`
+  - **500 Internal Server Error:** `{ "error": "Error inesperado: …" }`
+
+### 4. Update (PUT) and Partial (PATCH)
+- **Methods:** PUT and PATCH
+- **URL:** `/v1/reporte_devolucion/{id}/`
+- **Access:**
+  - **Superuser** / **Workers**: yes
+  - **Cliente**: only if it's **their own report** (has_object_permission)
+- **Body:** Only defecto (other fields are read-only)
+- **Responses:**
+  - **200 OK:** Updated report
+  - **400 / 500:** `{ "error": … }`
+
+### 5. Delete Report
+- **Method:** DELETE
+- **URL:** `/v1/reporte_devolucion/{id}/`
+- **Access:**
+  - **Superuser** / **Workers**: yes
+  - **Cliente**: only if it's **their own report**
+- **Responses:**
+  - **204 No Content:**
     ```json
-    {
-      "defecto": "Descripción del defecto (máx. 255 caracteres)"
-    }
+    { "message": "Reporte_Devolucion con id {id} eliminado" }
     ```
-    
-- **Flujo de creación:**
-    
-    1. Valida `defecto`.
-        
-    2. Busca el cilindro asignado al cliente (`get_object_or_404(Cilindro, asign=cliente)`).
-        
-    3. Crea `Reporte_Devolucion` con:
-        
-        - `fecha = date.today()`
-            
-        - `cliente` = usuario autenticado
-            
-        - `cilindro` = cilindro encontrado
-            
-- **Respuestas:**
-    
-    - **201 Created:** objeto `Reporte_Devolucion` recién creado.
-        
-    - **400 Bad Request:** `{ "error": "…ValidationError…" }`
-        
-    - **500 Internal Server Error:** `{ "error": "Error inesperado: …" }`
-        
+  - **400 / 500:** `{ "error": … }`
 
----
-
-### 4. Actualizar (PUT) y parcial (PATCH)
-
-- **Métodos:** `PUT` y `PATCH`
-    
-- **URL:** `/v1/reporte_devolucion/{id}/`
-    
-- **Acceso:**
-    
-    - **Superuser** / **Trabajadores**: sí
-        
-    - **Cliente**: sólo si es **su propio reporte** (`has_object_permission`).
-        
-- **Body:** sólo `defecto` (los demás campos son de solo lectura).
-    
-- **Respuestas:**
-    
-    - **200 OK:** reporte actualizado.
-        
-    - **400 / 500:** `{ "error": … }`
-        
-
----
-
-### 5. Eliminar reporte
-
-- **Método:** `DELETE`
-    
-- **URL:** `/v1/reporte_devolucion/{id}/`
-    
-- **Acceso:**
-    
-    - **Superuser** / **Trabajadores**: sí
-        
-    - **Cliente**: sólo si es **su propio reporte**.
-        
-- **Respuestas:**
-    
-    - **204 No Content:**
-        
-        ```json
-        { "message": "Reporte_Devolucion con id {id} eliminado" }
-        ```
-        
-    - **400 / 500:** `{ "error": … }`
-        
-
----
-
-> **Nota:** Asegúrate de que tu cliente reenvíe la cookie de sesión o cabecera de autenticación en cada petición para evitar un **401 Unauthorized**.
-
-
+> **Note:** Ensure your client forwards the session cookie or auth header in each request to avoid a **401 Unauthorized**.
