@@ -166,8 +166,7 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000"
+    '*'
 ]
 SESSION_COOKIE_AGE = 86400  # 1 dia en segundos 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True 
