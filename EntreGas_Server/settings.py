@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -148,7 +149,7 @@ SIMPLE_JWT = {
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173/',
+    'http://localhost:3000/',
     'http://127.0.0.1:8000'
 ]
 
@@ -166,6 +167,11 @@ CORS_ALLOW_HEADERS = [
     'authorization',
     'x-requested-with',
     'accept',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
 ]
 SESSION_COOKIE_AGE = 86400  # 1 dia en segundos 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True 
