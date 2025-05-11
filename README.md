@@ -8,6 +8,7 @@ https://entregas-server.onrender.com/v1/
 - [🚚 Comprobante_AbastecimientoViewSet](#-comprobante_abastecimientoviewset)
 - [🚚 Comprobante_EntregaViewSet](#-comprobante_entregaviewset)
 - [🔄 Reporte_DevolucionViewSet](#-reporte_devolucionviewset)
+- [🔄 Paginación](#-Paginación)
 
 ---
 
@@ -21,11 +22,7 @@ https://entregas-server.onrender.com/v1/
 
 ### Endpoints
 
-<<<<<<< HEAD
 ### 1. POST /v1/auth/login/
-=======
-### 1. POST /api/auth/login/
->>>>>>> deefcce04c5c7979f71e91ac130616c92ea8e22f
 - **Description:** Logs in and creates server session
 - **Request Body (JSON):**
   ```json
@@ -69,11 +66,7 @@ https://entregas-server.onrender.com/v1/
   { "error": "Credenciales inválidas" }
   ```
 
-<<<<<<< HEAD
 ### 2. POST /v1/auth/logout/
-=======
-### 2. POST /api/auth/logout/
->>>>>>> deefcce04c5c7979f71e91ac130616c92ea8e22f
 - **Description:** Logs out current session
 - **Headers:** Must send Django session cookie
 - **Permissions:** IsAuthenticated
@@ -82,11 +75,7 @@ https://entregas-server.onrender.com/v1/
   { "message": "Sesión cerrada" }
   ```
 
-<<<<<<< HEAD
 ### 3. GET /v1/auth/check_auth/
-=======
-### 3. GET /api/auth/check_auth/
->>>>>>> deefcce04c5c7979f71e91ac130616c92ea8e22f
 - **Description:** Checks if session is active
 - **Headers:** Must send session cookie
 - **Permissions:** IsAuthenticated
@@ -889,3 +878,8 @@ class Reporte_DevolucionSerializer(serializers.ModelSerializer):
   - **400 / 500:** `{ "error": … }`
 
 > **Note:** Ensure your client forwards the session cookie or auth header in each request to avoid a **401 Unauthorized**.
+
+
+**Paginación:** Esta API emplea la paginación de Django REST Framework (PageNumberPagination) con un tamaño de página predeterminado de 20.  
+- Para navegar entre páginas, añade el parámetro `?page=<n>` a la URL (por ejemplo: `/v1/cilindros/?page=2`).  
+- Si en tu configuración tienes habilitado `page_size_query_param`, también puedes ajustar el número de ítems por página con `?page_size=<tamaño>` (por ejemplo: `/v1/clientes/?page=1&page_size=50`).
