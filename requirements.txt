@@ -12,3 +12,4 @@ six==1.17.0
 sqlparse==0.5.3
 typing-extensions==4.13.2
 tzdata==2025.2
+gunicorn==20.1.0
