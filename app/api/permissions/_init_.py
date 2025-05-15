@@ -1,1 +1,2 @@
 from .trabajadorPermissions import IsJefeOrReadOnly
+from .authenticationPermissions import CsrfExemptSessionAuthentication

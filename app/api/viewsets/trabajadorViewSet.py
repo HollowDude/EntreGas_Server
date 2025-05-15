@@ -5,11 +5,13 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from app.api.serializers.trabajadorSerializer import TrabajadorSerializer
 from app.api.permissions.custom_permissions import CustomAccessPermission
+from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthentication
 
 class TrabajadorViewSet(viewsets.ModelViewSet):
     queryset = Trabajador.objects.select_related('user').all()
     serializer_class = TrabajadorSerializer
     permission_classes = [IsAuthenticated, CustomAccessPermission]
+    authentication_classes = [CsrfExemptSessionAuthentication]
 
     def create(self, request, *args, **kwargs):
         try:

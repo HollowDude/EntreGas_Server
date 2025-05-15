@@ -5,11 +5,13 @@ from rest_framework.response import Response
 from app.api.serializers.reporte_devolucionSerializer import Reporte_DevolucionSerializer
 from rest_framework.permissions import IsAuthenticated
 from app.api.permissions.custom_permissions import CustomAccessPermission
+from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthentication
 
 class Reporte_DevolucionViewSet(viewsets.ModelViewSet):
     queryset = Reporte_Devolucion.objects.select_related('cliente__user')
     serializer_class = Reporte_DevolucionSerializer
     permission_classes = [IsAuthenticated, CustomAccessPermission]
+    authentication_classes = [CsrfExemptSessionAuthentication]
 
     def create(self, request, *args, **kwargs):
         try:

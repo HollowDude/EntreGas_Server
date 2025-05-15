@@ -7,11 +7,13 @@ from app.api.serializers.comprobante_entregaSerializer import Comprobante_Entreg
 from rest_framework.permissions import IsAuthenticated
 from app.api.permissions.custom_permissions import CustomAccessPermission
 from app.api.utils import procesar_entrega, calcular_fecha_proximo_cilindro
+from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthentication
 
 
 class Comprobante_EntregaViewSet(viewsets.ModelViewSet):
     queryset = Comprobante_Entrega.objects.select_related('cliente__user')
     serializer_class = Comprobante_EntregaSerializer
+    authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [IsAuthenticated, CustomAccessPermission]
 
     def create(self, request, *args, **kwargs):
