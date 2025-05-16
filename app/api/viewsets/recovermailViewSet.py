@@ -1,4 +1,3 @@
-# views.py
 from datetime import timedelta
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -11,12 +10,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import UntypedToken
 from rest_framework.permissions import AllowAny
+from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthentication
 from app.api.serializers.recovermailSerializer import PasswordResetRequestSerializer, PasswordResetConfirmSerializer
 
 User = get_user_model()
 
 class PasswordResetViewSet(viewsets.ModelViewSet):
-    authentication_classes = []
+    authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [AllowAny]
     http_method_names = ['post', 'get']
 

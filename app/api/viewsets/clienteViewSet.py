@@ -5,10 +5,12 @@ from rest_framework.response import Response
 from app.api.serializers.clienteSerializer import ClienteSerializer
 from rest_framework.permissions import IsAuthenticated
 from app.api.permissions.custom_permissions import CustomAccessPermission
+from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthentication
 
 class ClienteViewSet(viewsets.ModelViewSet):
     queryset = Cliente.objects.select_related('user').all()
     serializer_class = ClienteSerializer
+    authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [IsAuthenticated, CustomAccessPermission]
 
     def create(self, request, *args, **kwargs):

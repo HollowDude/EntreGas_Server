@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from datetime import timedelta
 import os
 from pathlib import Path
+from corsheaders.defaults import default_headers, default_methods
 
 import dj_database_url
 
@@ -87,6 +88,8 @@ DATABASES = {
     )
 }
 
+
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -149,28 +152,26 @@ SIMPLE_JWT = {
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOW_METHODS = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-    'OPTIONS',
-]
+CORS_ALLOW_METHODS = list(default_methods)
 
-CORS_ALLOW_HEADERS = [
+CORS_ALLOW_HEADERS = list(default_headers) + [
     'content-type',
     'authorization',
     'x-requested-with',
     'accept',
+    'x-csrftoken'
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    '*'
-]
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE  = None
+CSRF_COOKIE_SECURE    = False
+CSRF_USE_SESSIONS = False 
+
 SESSION_COOKIE_AGE = 86400  # 1 dia en segundos 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True 
 SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_SAMESITE = None
+SESSION_COOKIE_SECURE = True
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587

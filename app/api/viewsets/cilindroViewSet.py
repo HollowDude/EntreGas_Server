@@ -5,12 +5,14 @@ from rest_framework.response import Response
 from app.api.serializers.cilindroSerializer import CilindroSerializer
 from rest_framework.permissions import IsAuthenticated
 from app.api.permissions.custom_permissions import CustomAccessPermission
+from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthentication
 from rest_framework.decorators import action
 from django.db.models import Q
 
 
 class CilindroViewSet(viewsets.ModelViewSet):
     queryset = Cilindro.objects.select_related('asign__user')
+    authentication_classes = [CsrfExemptSessionAuthentication]
     serializer_class = CilindroSerializer
     permission_classes = [IsAuthenticated, CustomAccessPermission]
 

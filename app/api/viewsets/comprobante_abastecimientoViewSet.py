@@ -5,11 +5,12 @@ from rest_framework.response import Response
 from app.api.serializers.comprobante_abastecimientoSerializer import Comprobante_AbastecimientoSerializer
 from rest_framework.permissions import IsAuthenticated
 from app.api.permissions.custom_permissions import CustomAccessPermission
-from app.api.utils import crear_cilindros_abastecimiento
+from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthentication
 
 class Comprobante_AbastecimientoViewSet(viewsets.ModelViewSet):
     queryset = Comprobante_Abastecimiento.objects.select_related('trabajador_recivio__user')
     serializer_class = Comprobante_AbastecimientoSerializer
+    authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [IsAuthenticated, CustomAccessPermission]
 
     def create(self, request, *args, **kwargs):
@@ -18,11 +19,6 @@ class Comprobante_AbastecimientoViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
 
             comprobante = serializer.save()
-
-            crear_cilindros_abastecimiento(
-                fecha=comprobante.fecha,
-                cantidad=comprobante.cant_cilindros
-            )
 
             return Response(
                 self.get_serializer(comprobante).data,
