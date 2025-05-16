@@ -14,17 +14,6 @@ class AuthViewSet(viewsets.ViewSet):
     authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [IsAuthenticated]
 
-    from django.contrib.auth import login
-from rest_framework import status, viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from django.contrib.auth.models import User
-from app.models.trabajador import Trabajador
-from app.models.cliente import Cliente
-
-class AuthViewSet(viewsets.GenericViewSet):
-
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def login(self, request):
         correo = request.data.get('correo')
