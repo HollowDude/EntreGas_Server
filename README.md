@@ -2,6 +2,7 @@
 
 **EntreGas** is a Django-based RESTful API designed to power a gas cylinder distribution management system at the **University of Informatics Sciences (UCI)** in Havana, Cuba. This backend project serves as the engine behind the EntreGas frontend, handling all logic and data operations related to gas cylinder logistics within the university campus.
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/HollowDude/EntreGas_Server)
 [📄 View the Documentation](https://deepwiki.com/HollowDude/EntreGas_Server)  
 [🚀 Live Deployment (Render)](https://entregas-server.onrender.com)
 
