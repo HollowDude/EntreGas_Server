@@ -19,6 +19,9 @@ class TrabajadorViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
 
             trabajador = serializer.save()
+
+            trabajador.user.is_staff = True
+            trabajador.user.save()
             
 
             return Response(self.get_serializer(trabajador).data, status=status.HTTP_201_CREATED)
