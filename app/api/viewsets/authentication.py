@@ -20,6 +20,7 @@ class AuthViewSet(viewsets.ViewSet):
         password = request.data.get('password')
         remember = request.data.get('recordar', False)
 
+
         if not correo or not password:
             return Response(
                 {'detail': 'Email and password are required.'},

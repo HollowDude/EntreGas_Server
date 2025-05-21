@@ -4,7 +4,7 @@ from .cliente import Cliente
 
 
 class Cilindro(models.Model):
-    num = models.CharField("Numero de serie", blank=True, null=True, max_length=255)
+    id = models.CharField(primary_key=True, max_length=10)
     fehca_llegada = models.DateField(default = date.today)
     defectuoso = models.BooleanField(default = False)
     lleno = models.BooleanField(default = True)

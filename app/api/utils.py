@@ -26,7 +26,6 @@ def crear_cilindros_abastecimiento(fecha: date, cantidad: int) -> None:
     """
     cilindros = [
         Cilindro(
-            num=None,
             fehca_llegada=fecha,
             defectuoso=False,
             lleno=True,
@@ -47,7 +46,7 @@ def procesar_entrega(comprobante) -> None:
     """
     cliente = comprobante.cliente
     cilindro_nuevo = (
-        Cilindro.objects.filter(num__isnull=False, asign__isnull=True, lleno=True, defectuoso=False).first()
+        Cilindro.objects.filter(asign__isnull=True, lleno=True, defectuoso=False).first()
     )
     if not cilindro_nuevo:
         raise ValidationError("No hay cilindros disponibles para asignar.")

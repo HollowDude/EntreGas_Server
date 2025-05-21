@@ -1,5 +1,4 @@
 from rest_framework import permissions
-from django.contrib.auth.models import User
 
 from app.models.cliente import Cliente
 
@@ -15,11 +14,11 @@ class CustomAccessPermission(permissions.BasePermission):
         if not user.is_authenticated:
             return False
 
-        if user.is_superuser or (hasattr(user, 'trabajador') and user.trabajador.puesto == 'administrador'):
+        if user.is_superuser or (hasattr(user, 'trabajador') and user.trabajador.puesto == 'jefe de servicio'):
             return True
 
         if hasattr(user, 'trabajador'):
-            if user.trabajador.puesto == 'jefe de servicio':
+            if user.trabajador.puesto == 'tecnico':
                 if view.action == 'create' and view.basename in ['comprobante-entrega', 'comprobante-abastecimiento']:
                     return True
                 if view.action == 'list' and view.basename in ['cliente', 'cilindro']:
@@ -42,7 +41,7 @@ class CustomAccessPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         user = request.user
-        if user.is_superuser or (hasattr(user, 'trabajador') and user.trabajador.puesto == 'administrador'):
+        if user.is_superuser or (hasattr(user, 'trabajador') and user.trabajador.puesto == 'jefe de servicio'):
             return True
 
         if hasattr(user, 'trabajador'):

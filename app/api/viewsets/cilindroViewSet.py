@@ -16,22 +16,12 @@ class CilindroViewSet(viewsets.ModelViewSet):
     serializer_class = CilindroSerializer
     permission_classes = [IsAuthenticated, CustomAccessPermission]
 
-    @action(detail=False, methods=['get'], url_path='sin-numero')
-    def cilindros_sin_numero(self, request):
-        queryset = self.get_queryset().filter(Q(num__isnull=True) | Q(num__exact=''))
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=['get'], url_path='con-numero')
-    def cilindros_con_numero(self, request):
-        queryset = self.get_queryset().filter(Q(num__isnull=False) & ~Q(num__exact=''))
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         try:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
+            print(serializer.validated_data)
 
             Cilindro = serializer.save()
             
