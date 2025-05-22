@@ -14,7 +14,7 @@ class ClienteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, CustomAccessPermission]
 
     def get_serializer_class(self):
-        if self.action in ['get', 'retrive']:
+        if self.action in ['list', 'retrive']:
             return ClienteFlatSerializer
         return ClienteSerializer
 
