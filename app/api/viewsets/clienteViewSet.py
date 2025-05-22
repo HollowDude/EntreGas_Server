@@ -2,7 +2,7 @@ from django.forms import ValidationError
 from rest_framework import viewsets, status
 from app.models.cliente import Cliente
 from rest_framework.response import Response
-from app.api.serializers.clienteSerializer import ClienteSerializer
+from app.api.serializers.clienteSerializer import ClienteSerializer, ClienteFlatSerializer
 from rest_framework.permissions import IsAuthenticated
 from app.api.permissions.custom_permissions import CustomAccessPermission
 from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthentication
@@ -12,6 +12,11 @@ class ClienteViewSet(viewsets.ModelViewSet):
     serializer_class = ClienteSerializer
     authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [IsAuthenticated, CustomAccessPermission]
+
+    def get_serializer_class(self):
+        if self.action in ['get', 'retrive']:
+            return ClienteFlatSerializer
+        return ClienteSerializer
 
     def create(self, request, *args, **kwargs):
         try:

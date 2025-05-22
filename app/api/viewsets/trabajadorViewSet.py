@@ -3,7 +3,7 @@ from rest_framework import viewsets, status
 from app.models.trabajador import Trabajador
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from app.api.serializers.trabajadorSerializer import TrabajadorSerializer
+from app.api.serializers.trabajadorSerializer import TrabajadorSerializer, TrabajadorFlatSerializer
 from app.api.permissions.custom_permissions import CustomAccessPermission
 from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthentication
 
@@ -12,6 +12,11 @@ class TrabajadorViewSet(viewsets.ModelViewSet):
     serializer_class = TrabajadorSerializer
     permission_classes = [IsAuthenticated, CustomAccessPermission]
     authentication_classes = [CsrfExemptSessionAuthentication]
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrive']:
+            return TrabajadorFlatSerializer
+        return TrabajadorSerializer
 
     def create(self, request, *args, **kwargs):
         try:

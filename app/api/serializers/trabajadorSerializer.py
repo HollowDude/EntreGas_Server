@@ -67,3 +67,25 @@ class TrabajadorSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+
+
+class TrabajadorFlatSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    puesto = serializers.CharField(source='get_puesto_display')
+    user_id    = serializers.IntegerField(source='user.id')
+    username   = serializers.CharField(source='user.username')
+    first_name = serializers.CharField(source='user.first_name')
+    last_name  = serializers.CharField(source='user.last_name')
+    email      = serializers.EmailField(source='user.email')
+
+    class Meta:
+        model = Trabajador
+        fields = [
+            'id',
+            'user_id',
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'puesto',
+        ]

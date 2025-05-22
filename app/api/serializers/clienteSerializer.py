@@ -71,3 +71,30 @@ class ClienteSerializer(serializers.ModelSerializer):
         if value >= date.today():
             raise serializers.ValidationError("La fecha de ultima T no puede ser superior a hoy")
         return value
+
+class ClienteFlatSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    tipo = serializers.CharField(source='get_puesto_display')
+    direccion = serializers.CharField(source='get_direccion_display')
+    fecha_UT = serializers.DateField(source='get_fecha_UT_display')
+    fecha_PC = serializers.DateField(source='get_fecha_PC_display')
+    user_id    = serializers.IntegerField(source='user.id')
+    username   = serializers.CharField(source='user.username')
+    first_name = serializers.CharField(source='user.first_name')
+    last_name  = serializers.CharField(source='user.last_name')
+    email      = serializers.EmailField(source='user.email')
+
+    class Meta:
+        model = Cliente
+        fields = [
+            'id',
+            'tipo',
+            'direccion',
+            'fecha_UT',
+            'fecha_PC',
+            'user_id',
+            'username',
+            'first_name',
+            'last_name',
+            'email'
+        ]
