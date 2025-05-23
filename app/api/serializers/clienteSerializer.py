@@ -74,10 +74,10 @@ class ClienteSerializer(serializers.ModelSerializer):
 
 class ClienteFlatSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
-    tipo = serializers.CharField(source='get_puesto_display')
-    direccion = serializers.CharField(source='get_direccion_display')
-    fecha_UT = serializers.DateField(source='get_fecha_UT_display')
-    fecha_PC = serializers.DateField(source='get_fecha_PC_display')
+    tipo = serializers.CharField(source='get_tipo_display')
+    direccion = serializers.CharField()
+    fecha_UT = serializers.DateField()
+    fecha_PC = serializers.DateField()
     user_id    = serializers.IntegerField(source='user.id')
     username   = serializers.CharField(source='user.username')
     first_name = serializers.CharField(source='user.first_name')
@@ -96,5 +96,5 @@ class ClienteFlatSerializer(serializers.ModelSerializer):
             'username',
             'first_name',
             'last_name',
-            'email'
+            'email',
         ]
