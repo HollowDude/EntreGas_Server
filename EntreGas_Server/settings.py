@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'rest_framework',
     'app'
@@ -130,12 +131,17 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication'
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+}
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,      # o True si quieres rotar en cada refresh
+    'BLACKLIST_AFTER_ROTATION': True,    # si usas blacklist
 }
 
 CORS_ALLOW_CREDENTIALS = True
@@ -150,15 +156,8 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     'x-csrftoken'
 ]
 
-CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE  = None
-CSRF_COOKIE_SECURE    = False
-CSRF_USE_SESSIONS = False 
 
-SESSION_COOKIE_AGE = 86400  # 1 dia en segundos 
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True 
-SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_SAMESITE = None
+SESSION_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = True
 
 EMAIL_HOST = 'smtp.gmail.com'
