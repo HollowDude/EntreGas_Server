@@ -48,7 +48,7 @@ class ClienteSerializer(serializers.ModelSerializer):
             # campos de User, todos en el primer nivel
             'username', 'contraseña', 'nombre', 'correo',
             # campos propios de Cliente
-            'direccion', 'tipo', 'fecha_UT', 'fecha_PC'
+            'direccion', 'tipo', 'fecha_UT'
         ]
 
     def create(self, validated_data):
