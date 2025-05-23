@@ -37,11 +37,20 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 class TrabajadorSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    username   = serializers.CharField(source='user.username')
+    contraseña   = serializers.CharField(write_only=True, source='user.password')
+    nombre = serializers.CharField(source='user.first_name', required=False)
+    correo      = serializers.EmailField(source='user.email')
 
     class Meta:
         model = Trabajador
-        fields = ['id', 'user', 'puesto']
+        fields = [
+            'id',
+            # campos de User, todos en el primer nivel
+            'username', 'contraseña', 'nombre', 'correo',
+            # campos propios de Cliente
+            'puesto'
+        ]
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
@@ -72,20 +81,16 @@ class TrabajadorSerializer(serializers.ModelSerializer):
 class TrabajadorFlatSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     puesto = serializers.CharField(source='get_puesto_display')
-    user_id    = serializers.IntegerField(source='user.id')
     username   = serializers.CharField(source='user.username')
-    first_name = serializers.CharField(source='user.first_name')
-    last_name  = serializers.CharField(source='user.last_name')
-    email      = serializers.EmailField(source='user.email')
+    nombre = serializers.CharField(source='user.first_name')
+    correo      = serializers.EmailField(source='user.email')
 
     class Meta:
         model = Trabajador
         fields = [
             'id',
-            'user_id',
             'username',
-            'first_name',
-            'last_name',
-            'email',
+            'nombre',
+            'correo',
             'puesto',
         ]

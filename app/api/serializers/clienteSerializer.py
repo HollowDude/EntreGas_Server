@@ -36,11 +36,20 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 class ClienteSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    username   = serializers.CharField(source='user.username')
+    contraseña   = serializers.CharField(write_only=True, source='user.password')
+    nombre = serializers.CharField(source='user.first_name', required=False)
+    correo      = serializers.EmailField(source='user.email')
 
     class Meta:
         model = Cliente
-        fields = ['user', 'id', 'direccion', 'tipo', 'fecha_UT', 'fecha_PC']
+        fields = [
+            'id',
+            # campos de User, todos en el primer nivel
+            'username', 'contraseña', 'nombre', 'correo',
+            # campos propios de Cliente
+            'direccion', 'tipo', 'fecha_UT', 'fecha_PC'
+        ]
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
@@ -78,11 +87,9 @@ class ClienteFlatSerializer(serializers.ModelSerializer):
     direccion = serializers.CharField()
     fecha_UT = serializers.DateField()
     fecha_PC = serializers.DateField()
-    user_id    = serializers.IntegerField(source='user.id')
     username   = serializers.CharField(source='user.username')
-    first_name = serializers.CharField(source='user.first_name')
-    last_name  = serializers.CharField(source='user.last_name')
-    email      = serializers.EmailField(source='user.email')
+    nombre = serializers.CharField(source='user.first_name')
+    correo      = serializers.EmailField(source='user.email')
 
     class Meta:
         model = Cliente
@@ -92,9 +99,7 @@ class ClienteFlatSerializer(serializers.ModelSerializer):
             'direccion',
             'fecha_UT',
             'fecha_PC',
-            'user_id',
             'username',
-            'first_name',
-            'last_name',
-            'email',
+            'nombre',
+            'correo',
         ]
