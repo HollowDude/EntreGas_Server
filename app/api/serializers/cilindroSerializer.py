@@ -26,4 +26,9 @@ class CilindroSerializer(serializers.ModelSerializer):
 
     def get_lleno(self, obj):
         return "True" if obj.lleno else "False"
+    
+    def get_asignacion(self, obj):
+        if obj.asign and obj.asign.user:
+            return obj.asign.user.email
+        return None
 

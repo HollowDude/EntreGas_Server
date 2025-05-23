@@ -48,7 +48,7 @@ class ClienteSerializer(serializers.ModelSerializer):
             # campos de User, todos en el primer nivel
             'username', 'contraseña', 'nombre', 'correo',
             # campos propios de Cliente
-            'direccion', 'tipo', 'fecha_UT'
+            'direccion', 'tipo'
         ]
 
     def create(self, validated_data):
@@ -75,11 +75,6 @@ class ClienteSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
-
-    def validate_fecha_UT(self, value):
-        if value >= date.today():
-            raise serializers.ValidationError("La fecha de ultima T no puede ser superior a hoy")
-        return value
 
 class ClienteFlatSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
