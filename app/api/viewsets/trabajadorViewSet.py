@@ -11,7 +11,6 @@ class TrabajadorViewSet(viewsets.ModelViewSet):
     queryset = Trabajador.objects.select_related('user').all()
     serializer_class = TrabajadorSerializer
     permission_classes = [IsAuthenticated, CustomAccessPermission]
-    authentication_classes = [CsrfExemptSessionAuthentication]
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrive']:

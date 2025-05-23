@@ -10,7 +10,6 @@ from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthe
 class Comprobante_AbastecimientoViewSet(viewsets.ModelViewSet):
     queryset = Comprobante_Abastecimiento.objects.select_related('trabajador_recivio__user')
     serializer_class = Comprobante_AbastecimientoSerializer
-    authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [IsAuthenticated, CustomAccessPermission]
 
     def create(self, request, *args, **kwargs):

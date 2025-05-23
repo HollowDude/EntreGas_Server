@@ -45,6 +45,7 @@ class AuthViewSet(viewsets.ViewSet):
         refresh_token = str(refresh)
 
         payload = {
+            'detail': 'Autenticado correctamente',
             'access': access_token,
             'refresh': refresh_token,
             'user': user.username,

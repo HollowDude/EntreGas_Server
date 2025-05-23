@@ -11,7 +11,6 @@ class Reporte_DevolucionViewSet(viewsets.ModelViewSet):
     queryset = Reporte_Devolucion.objects.select_related('cliente__user')
     serializer_class = Reporte_DevolucionSerializer
     permission_classes = [IsAuthenticated, CustomAccessPermission]
-    authentication_classes = [CsrfExemptSessionAuthentication]
 
     def create(self, request, *args, **kwargs):
         try:

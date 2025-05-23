@@ -10,7 +10,6 @@ from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthe
 class ClienteViewSet(viewsets.ModelViewSet):
     queryset = Cliente.objects.select_related('user').all()
     serializer_class = ClienteSerializer
-    authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [IsAuthenticated, CustomAccessPermission]
 
     def get_serializer_class(self):

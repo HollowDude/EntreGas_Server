@@ -12,7 +12,6 @@ from django.db.models import Q
 
 class CilindroViewSet(viewsets.ModelViewSet):
     queryset = Cilindro.objects.select_related('asign__user')
-    authentication_classes = [CsrfExemptSessionAuthentication]
     serializer_class = CilindroSerializer
     permission_classes = [IsAuthenticated, CustomAccessPermission]
 

@@ -13,7 +13,6 @@ from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthe
 class Comprobante_EntregaViewSet(viewsets.ModelViewSet):
     queryset = Comprobante_Entrega.objects.select_related('cliente__user')
     serializer_class = Comprobante_EntregaSerializer
-    authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [IsAuthenticated, CustomAccessPermission]
 
     def create(self, request, *args, **kwargs):

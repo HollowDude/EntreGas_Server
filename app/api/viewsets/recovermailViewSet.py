@@ -16,7 +16,6 @@ from app.api.serializers.recovermailSerializer import PasswordResetRequestSerial
 User = get_user_model()
 
 class PasswordResetViewSet(viewsets.ModelViewSet):
-    authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [AllowAny]
     http_method_names = ['post', 'get']
 
