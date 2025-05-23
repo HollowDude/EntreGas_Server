@@ -2,7 +2,7 @@ from rest_framework import serializers
 from app.models.cilindro import Cilindro
 
 class CilindroSerializer(serializers.ModelSerializer):
-    id   = serializers.CharField(read_only=True)
+    id   = serializers.CharField()
     fecha_de_llegada = serializers.SerializerMethodField()
     defectuoso = serializers.SerializerMethodField()
     lleno = serializers.SerializerMethodField()
