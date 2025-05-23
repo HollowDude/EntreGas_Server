@@ -12,7 +12,7 @@ class CilindroSerializer(serializers.ModelSerializer):
         model = Cilindro
         fields = [
             'id',
-            'fecha_llegada',
+            'fecha_de_llegada',
             'defectuoso',
             'lleno',
             'asignacion',
