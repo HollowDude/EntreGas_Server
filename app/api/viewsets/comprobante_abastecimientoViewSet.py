@@ -8,7 +8,7 @@ from app.api.permissions.custom_permissions import CustomAccessPermission
 from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthentication
 
 class Comprobante_AbastecimientoViewSet(viewsets.ModelViewSet):
-    queryset = Comprobante_Abastecimiento.objects.select_related('trabajador_recivio__user')
+    queryset = Comprobante_Abastecimiento.objects.select_related('trabajador_recibio__user')
     serializer_class = Comprobante_AbastecimientoSerializer
     permission_classes = [IsAuthenticated, CustomAccessPermission]
 

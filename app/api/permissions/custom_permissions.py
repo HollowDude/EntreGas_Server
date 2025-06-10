@@ -14,26 +14,31 @@ class CustomAccessPermission(permissions.BasePermission):
         if not user.is_authenticated:
             return False
 
-        if user.is_superuser or (hasattr(user, 'trabajador') and user.trabajador.puesto == 'jefe de servicio'):
+        if user.is_superuser or (hasattr(user, 'trabajador') and user.trabajador.puesto == 'Jefe de Servicio'):
             return True
 
         if hasattr(user, 'trabajador'):
-            if user.trabajador.puesto == 'tecnico':
-                if view.action == 'create' and view.basename in ['comprobante-entrega', 'comprobante-abastecimiento']:
+            if user.trabajador.puesto == 'Tecnico':
+                if view.action == 'create' and view.basename in ['cliente', 'cilindro', 'comprobante_entrega', 'reporte_devolucion']:
                     return True
-                if view.action == 'list' and view.basename in ['cliente', 'cilindro']:
+                if view.action == 'list' and view.basename in ['cliente', 'cilindro', 'comprobante_entrega', 'reporte_devolucion']:
                     return True
+                if view.action == 'destroy' and view.basename in ['cliente', 'cilindro']:
+                    return True
+                if view.action == 'partial_update' and view.basename in ['cliente', 'cilindro']:
+                    return True
+                
             
-            if view.basename == 'reporte-devolucion' and view.action in ['list', 'retrieve']:
+            if view.basename == 'reporte_devolucion' and view.action in ['list', 'retrieve']:
                 return True
             return False
 
         if hasattr(user, 'cliente'):
-            if view.basename == 'reporte-devolucion' and view.action == 'create':
+            if view.basename in ['reporte_devolucion'] and view.action == 'create':
                 return True
-            if view.basename == 'cilindro' and view.action == 'list':
+            if view.basename in ['cilindro', 'cliente'] and view.action in ['retrieve', 'list', 'solicitar', 'partial_update'] :
                 return True
-            if view.basename == 'cliente' and view.action in ['retrieve', 'update', 'partial_update']:
+            if view.basename in ['cliente'] and view.action in ['retrieve', 'update', 'partial_update']:
                 return True
             return False
 
@@ -41,7 +46,7 @@ class CustomAccessPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         user = request.user
-        if user.is_superuser or (hasattr(user, 'trabajador') and user.trabajador.puesto == 'jefe de servicio'):
+        if user.is_superuser or (hasattr(user, 'trabajador') and user.trabajador.puesto == 'Jefe de Servicio'):
             return True
 
         if hasattr(user, 'trabajador'):

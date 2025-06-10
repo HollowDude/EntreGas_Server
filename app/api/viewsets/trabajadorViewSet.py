@@ -7,6 +7,8 @@ from app.api.serializers.trabajadorSerializer import TrabajadorSerializer, Traba
 from app.api.permissions.custom_permissions import CustomAccessPermission
 from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthentication
 
+from django.contrib.auth.models import User
+
 class TrabajadorViewSet(viewsets.ModelViewSet):
     queryset = Trabajador.objects.select_related('user').all()
     serializer_class = TrabajadorSerializer
@@ -39,6 +41,8 @@ class TrabajadorViewSet(viewsets.ModelViewSet):
         try:
             
             instance = self.get_object()
+            user = User.objects.get(id = instance.user_id)
+            user.delete()
             instance.delete()
 
             return Response(
@@ -53,7 +57,7 @@ class TrabajadorViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         try:
 
-            instance = self.get_object(request.id)
+            instance = self.get_object()
             serializer = self.get_serializer(instance, data=request.data)
 
             serializer.is_valid(raise_exception=True)

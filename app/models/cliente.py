@@ -2,8 +2,8 @@ from django.contrib.auth.models import User
 from django.db import models
 
 TIPOS = [
-    ("normal", "Normal"),
-    ("especial", "Especial")
+    ("Normal", "Normal"),
+    ("Especial", "Especial")
 ]
 
 class Cliente(models.Model):
