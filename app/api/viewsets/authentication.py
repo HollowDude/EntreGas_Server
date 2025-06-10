@@ -110,7 +110,7 @@ class AuthViewSet(viewsets.ViewSet):
         """
         user = request.user
         if not user or not user.is_authenticated:
-            return Response({'authenticated': False}, status=status.HTTP_200_OK)
+            return Response({'authenticated': False}, status=status.HTTP_401_UNAUTHORIZED)
 
         # Determinar rol
         if user.is_superuser:

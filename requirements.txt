@@ -4,7 +4,7 @@ Django==4.2.20
 django-cors-headers==4.7.0
 djangorestframework==3.16.0
 djangorestframework-simplejwt==5.5.0
-psycopg2==2.9.10
+psycopg2-binary==2.9.10
 PyJWT==2.9.0
 python-dateutil==2.9.0.post0
 rest-framework-simplejwt==0.0.2
