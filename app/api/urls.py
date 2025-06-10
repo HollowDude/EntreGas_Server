@@ -21,7 +21,6 @@ router.register('comprobante_entrega', Comprobante_EntregaViewSet)
 router.register('reporte_devolucion', Reporte_DevolucionViewSet)
 
 
-
 #El auth
 router.register(r'auth', AuthViewSet, basename='auth')
 router.register(r'password-reset', PasswordResetViewSet, basename='password-reset')

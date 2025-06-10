@@ -2,8 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 
 PUESTOS = [
-    ("tecnico", "Tecnico"),
-    ("jefe de servicio", "Jefe de Servicio")
+    ("Tecnico", "Tecnico", ),
+    ("Jefe de Servicio", "Jefe de Servicio")
 ]
 
 class Trabajador(models.Model):

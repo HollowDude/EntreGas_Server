@@ -6,6 +6,11 @@ from app.api.serializers.reporte_devolucionSerializer import Reporte_DevolucionS
 from rest_framework.permissions import IsAuthenticated
 from app.api.permissions.custom_permissions import CustomAccessPermission
 from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthentication
+from app.models.cliente import Cliente
+from app.models.cilindro import Cilindro
+from django.shortcuts import get_object_or_404
+from datetime import date
+
 
 class Reporte_DevolucionViewSet(viewsets.ModelViewSet):
     queryset = Reporte_Devolucion.objects.select_related('cliente__user')
@@ -16,14 +21,22 @@ class Reporte_DevolucionViewSet(viewsets.ModelViewSet):
         try:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
+            validated_data = serializer.validated_data
 
-            cliente = request.user.cliente
+            cliente = getattr(request.user, 'cliente', None)
+            if cliente is None:
+                cliente_id = int(validated_data.get('cliente').get('id'))
+                print("Prueba: ", validated_data.get('cliente') )
+                if not cliente_id:
+                    raise ValidationError("Se requiere un cliente para el reporte")
+                cliente = get_object_or_404(Cliente, id=cliente_id)
 
             cilindro = get_object_or_404(Cilindro, asign=cliente)
 
             reporte = serializer.save(
                 cliente=cliente,
                 cilindro=cilindro,
+                defecto=validated_data.get('defecto'),
                 fecha=date.today()
             )
 

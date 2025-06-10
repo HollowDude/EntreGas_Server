@@ -56,14 +56,16 @@ class AuthViewSet(viewsets.ViewSet):
             trab = Trabajador.objects.get(user=user)
             payload.update({
                 'tipo_usuario': 'trabajador',
-                'puesto': trab.puesto
+                'puesto': trab.puesto,
+                'id' : trab.id
             })
         except Trabajador.DoesNotExist:
             try:
                 cli = Cliente.objects.get(user=user)
                 payload.update({
                     'tipo_usuario': 'cliente',
-                    'tipo_cliente': cli.tipo
+                    'tipo_cliente': cli.tipo,
+                    'id' : cli.id
                 })
             except Cliente.DoesNotExist:
                 payload['tipo_usuario'] = 'desconocido'

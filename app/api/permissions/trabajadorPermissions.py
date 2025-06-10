@@ -14,6 +14,6 @@ class IsJefeOrReadOnly(permissions.BasePermission):
             return True
         
         if hasattr(request.user, 'trabajador'):
-            return request.user.trabajador.puesto == "jefe de servicio"
+            return request.user.trabajador.puesto == "Jefe de Servicio"
         
         return False

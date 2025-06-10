@@ -7,6 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from app.api.permissions.custom_permissions import CustomAccessPermission
 from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthentication
 
+from django.contrib.auth.models import User
+
 class ClienteViewSet(viewsets.ModelViewSet):
     queryset = Cliente.objects.select_related('user').all()
     serializer_class = ClienteSerializer
@@ -36,6 +38,8 @@ class ClienteViewSet(viewsets.ModelViewSet):
         try:
             
             instance = self.get_object()
+            user = User.objects.get(id = instance.user_id)
+            user.delete()
             instance.delete()
 
             return Response(

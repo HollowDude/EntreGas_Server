@@ -6,14 +6,14 @@ from app.models.cliente import Cliente
 from app.models.cilindro import Cilindro
 
 
-def calcular_fecha_proximo_cilindro(tipo: str) -> date:
+def calcular_fecha_proximo_cilindro(tipo: str, fecha: date) -> date:
     """
     Para clientes normales: hoy + 2 meses.
     Para clientes especiales: hoy + 1 mes.
     """
-    if tipo == "normal":
-        return date.today() + relativedelta(months=2)
-    return date.today() + relativedelta(months=1)
+    if tipo == "Normal":
+        return fecha + relativedelta(months=3)
+    return fecha + relativedelta(months=1)
 
 
 def crear_cilindros_abastecimiento(fecha: date, cantidad: int) -> None:
@@ -56,6 +56,9 @@ def procesar_entrega(comprobante) -> None:
 
     comprobante.cilindroE = cilindro_nuevo
     comprobante.cilindroS = cilindro_antiguo
+
+    print(cilindro_antiguo, cilindro_nuevo)
+
     comprobante.save(update_fields=['cilindroE', 'cilindroS'])
 
     cilindro_nuevo.asign = cliente
@@ -65,3 +68,13 @@ def procesar_entrega(comprobante) -> None:
         cilindro_antiguo.asign = None
         cilindro_antiguo.lleno = False
         cilindro_antiguo.save(update_fields=['asign', 'lleno'])
+
+
+def verificar_disponibilidad() -> None:
+
+    cilindro_nuevo = (
+        Cilindro.objects.filter(asign__isnull=True, lleno=True, defectuoso=False).first()
+    )
+    if not cilindro_nuevo:
+        return False
+    return True
