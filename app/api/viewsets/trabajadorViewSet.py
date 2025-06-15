@@ -24,6 +24,11 @@ class TrabajadorViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
+            print(serializer.validated_data)
+            if User.objects.filter(email=serializer.validated_data.get('user').get('email')).exists():
+                print("ya existe el user")
+                raise Exception('Ya existe un usuario con ese email')
+
             trabajador = serializer.save()
 
             trabajador.user.is_staff = True

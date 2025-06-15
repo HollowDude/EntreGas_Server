@@ -6,7 +6,7 @@ class CilindroSerializer(serializers.ModelSerializer):
     fecha_de_llegada = serializers.DateField()
     defectuoso = serializers.BooleanField()
     lleno = serializers.BooleanField()
-    asignacion = serializers.CharField( source="asign.user.username" , read_only=True)
+    asignacion = serializers.SerializerMethodField()
 
     class Meta:
         model = Cilindro

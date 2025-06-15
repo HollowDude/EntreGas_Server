@@ -25,11 +25,11 @@ class Reporte_DevolucionViewSet(viewsets.ModelViewSet):
 
             cliente = getattr(request.user, 'cliente', None)
             if cliente is None:
-                cliente_id = int(validated_data.get('cliente').get('id'))
+                cliente_id = validated_data.get('cliente').get('user').get('username')
                 print("Prueba: ", validated_data.get('cliente') )
                 if not cliente_id:
                     raise ValidationError("Se requiere un cliente para el reporte")
-                cliente = get_object_or_404(Cliente, id=cliente_id)
+                cliente = get_object_or_404(Cliente, user__username=cliente_id)
 
             cilindro = get_object_or_404(Cilindro, asign=cliente)
 
