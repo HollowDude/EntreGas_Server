@@ -1,6 +1,7 @@
 from django.forms import ValidationError
 from rest_framework import viewsets, status
 from app.models.comprobante_abastecimiento import Comprobante_Abastecimiento
+from app.models.trabajador import Trabajador
 from rest_framework.response import Response
 from app.api.serializers.comprobante_abastecimientoSerializer import Comprobante_AbastecimientoSerializer
 from rest_framework.permissions import IsAuthenticated
@@ -17,7 +18,12 @@ class Comprobante_AbastecimientoViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
-            comprobante = serializer.save()
+            try:
+                trabajador_recibio = Trabajador.objects.get(user__username=request.data.get('trabajador_recibio'))
+            except Trabajador.DoesNotExist:
+                raise ValidationError("El trabajador especificado no existe.")
+
+            comprobante = serializer.save(trabajador_recibio=trabajador_recibio)
 
             return Response(
                 self.get_serializer(comprobante).data,
@@ -28,6 +34,6 @@ class Comprobante_AbastecimientoViewSet(viewsets.ModelViewSet):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response(
-                {'error': f'Un error inesperado ha ocurrido: {e}'},
+                {'error': f'{str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
