@@ -22,9 +22,9 @@ class CilindroViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
 
             Cilindro = serializer.save()
-            
+        
 
-            return Response(self.get_serializer(Cilindro).data, status=status.HTTP_201_CREATED)
+            return Response({"message":"Cilindro creado correctamente"}, status=status.HTTP_201_CREATED)
 
         except ValidationError as e:
             return Response({'error' : str(e)}, status=status.HTTP_400_BAD_REQUEST)

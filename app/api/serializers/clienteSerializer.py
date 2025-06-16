@@ -90,11 +90,11 @@ class ClienteFlatSerializer(serializers.ModelSerializer):
         model = Cliente
         fields = [
             'id',
-            'tipo',
+            'nombre',
+            'correo',
             'direccion',
+            'tipo',
             'fecha_UT',
             'fecha_PC',
             'username',
-            'nombre',
-            'correo',
         ]

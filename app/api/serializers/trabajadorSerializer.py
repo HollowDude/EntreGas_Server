@@ -89,8 +89,8 @@ class TrabajadorFlatSerializer(serializers.ModelSerializer):
         model = Trabajador
         fields = [
             'id',
-            'username',
             'nombre',
             'correo',
+            'username',
             'puesto',
         ]

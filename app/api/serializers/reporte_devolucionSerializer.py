@@ -3,7 +3,7 @@ from app.models.reporte_devolucion import Reporte_Devolucion
 
 
 class Reporte_DevolucionSerializer(serializers.ModelSerializer):
-    cliente = serializers.CharField(source='cliente.id', required=False)
+    cliente = serializers.CharField(source='cliente.user.username', required=False)
 
     class Meta:
         model = Reporte_Devolucion

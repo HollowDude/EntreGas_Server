@@ -1,7 +1,10 @@
 from datetime import date
+from xmlrpc import client
 from django.forms import ValidationError
 from rest_framework import viewsets, status
-from app.models.comprobante_entrega import Comprobante_Entrega, Cliente
+from app.models.comprobante_entrega import Comprobante_Entrega
+from app.models.cilindro import Cilindro
+from app.models.cliente import Cliente
 from rest_framework.response import Response
 from app.api.serializers.comprobante_entregaSerializer import Comprobante_EntregaSerializer
 from rest_framework.permissions import IsAuthenticated
@@ -11,6 +14,8 @@ from app.api.permissions.authenticationPermissions import CsrfExemptSessionAuthe
 from rest_framework.decorators import action 
 from datetime import datetime, date
 from rest_framework.permissions import AllowAny
+
+from django.db import transaction
 
 
 class Comprobante_EntregaViewSet(viewsets.ModelViewSet):
@@ -36,7 +41,7 @@ class Comprobante_EntregaViewSet(viewsets.ModelViewSet):
             )
 
 
-    def create(self, request, *args, **kwargs):
+    """ def create(self, request, *args, **kwargs):
         try:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
@@ -78,5 +83,62 @@ class Comprobante_EntregaViewSet(viewsets.ModelViewSet):
             return Response(
                 {'error': f'Un error inesperado ha ocurrido: {e}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            ) 
+     """
     
+    
+    def create(self, request, *args, **kwargs):
+            
+            try:
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+            except ValidationError:
+                return Response({'error': 'Datos inválidos'}, status=status.HTTP_400_BAD_REQUEST)
+
+            client = Cliente.objects.get(user__username=request.data.get('cliente'))
+            if not client:
+                return Response(
+                    {'error':'El cliente especificado no existe'},
+                    status=404
+                )
+
+            cilindroE = Cilindro.objects.filter(asign__isnull=True, defectuoso=False, lleno=True).first()
+            if not cilindroE:
+                return Response(
+                    {'message':'No hay cilindros disponibles para asignar'},
+                    status=200
+                )
+            
+            try:
+                cilindroS = Cilindro.objects.get(asign=client)
+            except Cilindro.DoesNotExist:
+                cilindroS = None 
+
+
+            entrega = Comprobante_Entrega(fecha=request.data.get('fecha'), cliente=client, cilindroE=cilindroE, cilindroS=cilindroS)
+
+            try:
+                with transaction.atomic():
+                    entrega.save()
+                    fecha_obj = datetime.strptime(request.data.get("fecha"), '%Y-%m-%d').date()
+                    nextDate = calcular_fecha_proximo_cilindro(client.tipo, fecha_obj)
+                    Cliente.objects.filter(direccion=client.direccion).update(fecha_UT=fecha_obj, fecha_PC=nextDate)
+                    cilindroE.asign = client
+                    cilindroE.save()
+                    if cilindroS:
+                        cilindroS.lleno = False
+                        cilindroS.asign = None
+                        cilindroS.save()
+            except Exception as e:
+                return Response(
+                    {'error': f'{str(e)}'},
+                    status=500
+                )
+            
+            return Response(
+                {'message':"Entrega exitosa"},
+                status=200
+            )
+
+
+
