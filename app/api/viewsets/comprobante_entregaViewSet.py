@@ -102,7 +102,7 @@ class Comprobante_EntregaViewSet(viewsets.ModelViewSet):
                     status=404
                 )
 
-            cilindroE = Cilindro.objects.filter(asign__isnull=True, defectuoso=False).first()
+            cilindroE = Cilindro.objects.filter(asign__isnull=True, defectuoso=False, lleno=True).first()
             if not cilindroE:
                 return Response(
                     {'message':'No hay cilindros disponibles para asignar'},
