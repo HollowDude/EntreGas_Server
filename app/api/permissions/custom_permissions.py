@@ -27,6 +27,8 @@ class CustomAccessPermission(permissions.BasePermission):
                     return True
                 if view.action == 'partial_update' and view.basename in ['cliente', 'cilindro']:
                     return True
+                if view.basename in ['queja_sugerencia'] and view.action == 'list':
+                    return True
                 
             
             if view.basename == 'reporte_devolucion' and view.action in ['list', 'retrieve']:
@@ -39,6 +41,8 @@ class CustomAccessPermission(permissions.BasePermission):
             if view.basename in ['cilindro', 'cliente'] and view.action in ['retrieve', 'list', 'solicitar', 'partial_update'] :
                 return True
             if view.basename in ['cliente'] and view.action in ['retrieve', 'update', 'partial_update']:
+                return True
+            if view.basename in ['queja_sugerencia'] and view.action == 'create':
                 return True
             return False
 

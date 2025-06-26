@@ -61,24 +61,29 @@ class Reporte_DevolucionViewSet(viewsets.ModelViewSet):
         except ValidationError:
             return Response({'error': 'Datos inválidos'}, status=status.HTTP_400_BAD_REQUEST)
         
-        client = Cliente.objects.get(user__username=request.data.get('cliente'))
-        if not client:
-            return Response(
-                {'error':'El cliente especificado no existe'},
-                status=404
-            )
+        cliente = getattr(request.user, 'cliente', None)
+        fecha_obj = date.today()
+        if cliente is None:
+            try:
+                print("Prueba: Desde panel de administrador")
+                cliente = Cliente.objects.get(user__username=request.data.get('cliente'))
+                fecha_obj = datetime.strptime(request.data.get("fecha"), '%Y-%m-%d').date()
+            except Cliente.DoesNotExist:
+                return Response(
+                    {'error': 'El cliente especificado no existe'},
+                    status=404
+                )
 
-        cilindro= Cilindro.objects.get(asign=client)
-        if not cilindro:
+        try:
+            cilindro= Cilindro.objects.get(asign=cliente)
+        except Exception as e:
             return Response(
                 {'error':'El cliente actual no tiene cilindros asignados'},
                 status=404
             )        
-        
-        fecha_obj = datetime.strptime(request.data.get("fecha"), '%Y-%m-%d').date()
 
         try:
-            rd = Reporte_Devolucion(fecha=fecha_obj, cliente=client, cilindro=cilindro, defecto=request.data.get('defecto'))
+            rd = Reporte_Devolucion(fecha=fecha_obj, cliente=cliente, cilindro=cilindro, defecto=request.data.get('defecto'))
             rd.save()
         except Exception as e:
             return Response(

@@ -8,6 +8,7 @@ from app.api.viewsets.comprobante_abastecimientoViewSet import Comprobante_Abast
 from app.api.viewsets.comprobante_entregaViewSet import Comprobante_EntregaViewSet
 from app.api.viewsets.reporte_devolucionViewSet import Reporte_DevolucionViewSet
 from app.api.viewsets.recovermailViewSet import PasswordResetViewSet
+from app.api.viewsets.queja_sugerencia import QuejaSugerenciaViewSet
 
 
 router = DefaultRouter()
@@ -19,6 +20,7 @@ router.register('cilindro', CilindroViewSet)
 router.register('comprobante_abastecimiento', Comprobante_AbastecimientoViewSet)
 router.register('comprobante_entrega', Comprobante_EntregaViewSet)
 router.register('reporte_devolucion', Reporte_DevolucionViewSet)
+router.register('queja_sugerencia', QuejaSugerenciaViewSet)
 
 
 #El auth
